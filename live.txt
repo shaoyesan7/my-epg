@@ -120,7 +120,6 @@ TVB追剧小能手,https://live.ottiptv.cc/huya/23865179
 正经纪录片,https://live.ottiptv.cc/huya/23860049
 亚运体育7号台,https://live.ottiptv.cc/huya/136154
 华视-喜剧大片,https://live.ottiptv.cc/huya/23352525
-
 央视频道,#genre#
 CCTV-1,http://10.255.128.136/PLTV/88888888/224/3221225633/10000100000000060000000000000170_0.smil/index.m3u8?fmt=ts2hls
 CCTV-1,http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv1hd
@@ -238,7 +237,6 @@ CGTN-西班牙语国际,http://10.255.128.136/PLTV/88888888/224/3221226249/10000
 CGTN-阿拉伯语国际,http://10.255.128.136/PLTV/88888888/224/3221226260/10000100000000060000000000801394_0.smil/index.m3u8?fmt=ts2hls
 CGTN-法语国际,http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000000060000000000801393_0.smil/index.m3u8?fmt=ts2hls
 央视文化精品,http://10.255.128.136/PLTV/88888888/224/3221225758/10000100000000060000000000000295_0.smil/index.m3u8?fmt=ts2hls
-
 卫视频道,#genre#
 三沙卫视,http://107.150.60.122/live/ssws.m3u8
 三沙卫视,http://63.141.230.178:82/gslb/zbdq5.m3u8?id=ssws
@@ -345,9 +343,9 @@ CGTN-法语国际,http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000
 福建海峡卫视,http://38.64.72.148:80/hls/modn/list/4009/playlist.m3u8
 莲花卫视,http://php.jdshipin.com:8880/amlh.php
 蒙语卫视,https://livestream-bt.nmtv.cn/nmtv/2315general.m3u8?txSecret=4971666599ef9411629213c9a300bf66&txTime=771EF880
-西藏卫视,http://10.255.128.136/PLTV/88888888/224/3221226269/10000100000000060000000000863663_0.smil/index.m3u8?fmt=ts2hls
 西藏卫视,http://10.255.128.136/PLTV/88888888/224/3221225728/10000100000000060000000000000265_0.smil/index.m3u8?fmt=ts2hls
 西藏卫视,https://live.264788.xyz/channel/xizangweishi?streamid=4b4e8ea919f1cfd5e43deed1d1675251&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+西藏卫视藏语,http://10.255.128.136/PLTV/88888888/224/3221226269/10000100000000060000000000863663_0.smil/index.m3u8?fmt=ts2hls
 贵州卫视,http://10.255.128.136/PLTV/88888888/224/3221225828/10000100000000060000000000263901_0.smil/index.m3u8?fmt=ts2hls
 贵州卫视,https://live.264788.xyz/channel/guizhouweishi?streamid=091bd59ea031989839c23459bb8cc9d4&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 贵州卫视,http://107.150.60.122/live/gzwshd.m3u8
@@ -366,7 +364,6 @@ CGTN-法语国际,http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000
 黑龙江卫视,http://107.150.60.122/live/hljwshd.m3u8
 黑龙江卫视,http://63.141.230.178:82/gslb/zbdq5.m3u8?id=hljwshd
 上海东方卫视,http://10.255.128.136/PLTV/88888888/224/3221225654/10000100000000060000000000000191_0.smil/index.m3u8?fmt=ts2hls
-
 辽宁地方,#genre#
 辽宁卫视,http://10.255.128.136/PLTV/88888888/224/3221225632/10000100000000060000000000000169_0.smil/index.m3u8?fmt=ts2hls
 辽宁卫视,http://120.76.248.139/live/bfgd/4200000058.m3u8
@@ -422,7 +419,6 @@ CGTN-法语国际,http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000
 葫芦岛新闻综合,http://120.76.248.139/live/bfgd/4200000284.m3u8
 葫芦岛新闻综合,http://angtv.cc/test/lngd.php?id=284
 辽宁宜佳购物,http://10.255.128.136/PLTV/88888888/224/3221226291/10000100000000060000000000801425_0.smil/index.m3u8?fmt=ts2hls
-
 港澳台,#genre#
 无线新闻,https://h5cdn3.kylintv.tv/live/tvbnews_iphone.m3u8
 翡翠台,http://r.jdshipin.com/qrfbg
@@ -436,7 +432,6 @@ TVBS新闻台,http://61.221.215.25:8800/hls/9/index.m3u8
 民视新闻台,http://38.64.72.148:80/hls/modn/list/4012/chunklist1.m3u8
 东森超视,http://38.64.72.148:80/hls/modn/list/2013/chunklist1.m3u8
 三立戏剧,http://61.221.215.25:8800/hls/41/index.m3u8
-
 地方频道,#genre#
 七台河新闻综合,http://live.qthnews.org.cn:1935/live/live1/800k/tzwj_video.m3u8
 万州综合,http://wanzhoulive.cbg.cn:8017/iTXwrGs/800/live.m3u8
@@ -865,7 +860,6 @@ TVBS新闻台,http://61.221.215.25:8800/hls/9/index.m3u8
 龙泉新闻综合,http://l.cztvcloud.com/channels/lantian/SXlongquan1/720p.m3u8
 龙游新闻综合,http://l.cztvcloud.com/channels/lantian/SXlongyou1/720p.m3u8?zzhed
 龙游新闻综合,http://l.cztvcloud.com/channels/lantian/SXlongyou1/720p.m3u8
-
 其他频道,#genre#
 AMC电影台,http://61.221.215.25:8800/hls/43/index.m3u8
 BRTV纪实科教,http://120.76.248.139/live/bfgd/4200000113.m3u8
