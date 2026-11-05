@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-11-05 10:02:38 +0800",
+  "window": [
+    "2026-10-30",
+    "2026-11-08"
+  ],
+  "channels": 930,
+  "programmes": 180439,
+  "date_range": [
+    "20261030",
+    "20261107"
+  ],
+  "dates": [
+    "20261030",
+    "20261031",
+    "20261101",
+    "20261102",
+    "20261103",
+    "20261104",
+    "20261105",
+    "20261106",
+    "20261107"
+  ],
+  "sources": {
+    "zsdc": "channels=126 added_programmes=37101",
+    "kuke31": "channels=511 added_programmes=107464",
+    "plsy1": "channels=163 added_programmes=25634",
+    "112114": "channels=535 added_programmes=10240"
+  }
+}
