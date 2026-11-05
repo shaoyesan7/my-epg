@@ -1,9 +1,9 @@
 #EXTM3U url-tvg="https://raw.githubusercontent.com/shaoyesan7/my-epg/main/epg.xml.gz" x-tvg-url="https://raw.githubusercontent.com/shaoyesan7/my-epg/main/epg.xml.gz"
-#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226231/10000100000000060000000000787860_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC动作电影
+#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226231/10000100000000060000000000787860_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC动作电影
 http://10.255.128.136/PLTV/88888888/224/3221226231/10000100000000060000000000787860_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC动作电影
+#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" group-title="电影轮播",CHC动作电影
 http://38.75.136.137:98/gslb/dsdqpub/chcdz.m3u8?auth=testpub
-#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC动作电影
+#EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" group-title="电影轮播",CHC动作电影
 http://198.204.228.26/live/chcdz.m3u8
 #EXTINF:-1 tvg-id="CHC家庭影院" tvg-name="CHC家庭影院" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC2.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787868_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC家庭影院
 http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787868_0.smil/index.m3u8?fmt=ts2hls
@@ -11,11 +11,11 @@ http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=chcjt
 #EXTINF:-1 tvg-id="CHC家庭影院" tvg-name="CHC家庭影院" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC2.png" group-title="电影轮播",CHC家庭影院
 http://198.204.228.26/live/chcjt.m3u8
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC影迷电影
 http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC影迷电影
 http://58.19.38.162:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC3.png" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC影迷电影
 http://122.228.73.138:2380/hw1live.rxip.sc96655.com.huan.tv/live/lnwsCHC-HDH265_4000.m3u8
 #EXTINF:-1 tvg-id="1905电影网" tvg-name="1905电影网" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/1905dy.png" group-title="电影轮播",1905电影网
 http://8.138.7.223/tv/1905.php?id=LIVE8J4LTCXPI7QJ5
@@ -743,31 +743,31 @@ http://10.255.128.136/PLTV/88888888/224/3221225680/10000100000000060000000000000
 https://ls.qingting.fm/live/1099/64k.m3u8
 #EXTINF:-1 tvg-id="辽宁都市" tvg-name="辽宁都市" tvg-logo="https://www.xn--rgv465a.top/tvlogo/辽宁都市.png" group-title="辽宁地方",辽宁都市
 http://120.76.248.139/live/bfgd/4200000068.m3u8
-#EXTINF:-1 tvg-id="辽宁影视剧" tvg-name="辽宁影视剧" tvg-logo="https://live.fanmingming.cn/tv/辽宁影视剧.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226272/10000100000000060000000000801423_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁影视剧
+#EXTINF:-1 tvg-id="辽宁影视剧" tvg-name="辽宁影视剧" tvg-logo="https://tb.zbds.top/logo/辽宁影视剧.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226272/10000100000000060000000000801423_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁影视剧
 http://10.255.128.136/PLTV/88888888/224/3221226272/10000100000000060000000000801423_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="辽宁影视剧" tvg-name="辽宁影视剧" tvg-logo="https://live.fanmingming.cn/tv/辽宁影视剧.png" group-title="辽宁地方",辽宁影视剧
+#EXTINF:-1 tvg-id="辽宁影视剧" tvg-name="辽宁影视剧" tvg-logo="https://tb.zbds.top/logo/辽宁影视剧.png" group-title="辽宁地方",辽宁影视剧
 http://120.76.248.139/live/bfgd/4200000070.m3u8
-#EXTINF:-1 tvg-id="辽宁体育休闲" tvg-name="辽宁体育" tvg-logo="https://live.fanmingming.cn/tv/辽宁体育.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225682/10000100000000060000000000000219_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁体育
+#EXTINF:-1 tvg-id="辽宁体育休闲" tvg-name="辽宁体育" tvg-logo="https://tb.zbds.top/logo/辽宁体育.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225682/10000100000000060000000000000219_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁体育
 http://10.255.128.136/PLTV/88888888/224/3221225682/10000100000000060000000000000219_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="辽宁体育休闲" tvg-name="辽宁体育" tvg-logo="https://live.fanmingming.cn/tv/辽宁体育.png" group-title="辽宁地方",辽宁体育
+#EXTINF:-1 tvg-id="辽宁体育休闲" tvg-name="辽宁体育" tvg-logo="https://tb.zbds.top/logo/辽宁体育.png" group-title="辽宁地方",辽宁体育
 http://120.76.248.139/live/bfgd/4200000611.m3u8
 #EXTINF:-1 tvg-id="辽宁生活" tvg-name="辽宁生活" tvg-logo="https://live.fanmingming.cn/tv/辽宁生活.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225683/10000100000000060000000000000220_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁生活
 http://10.255.128.136/PLTV/88888888/224/3221225683/10000100000000060000000000000220_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="辽宁生活" tvg-name="辽宁生活" tvg-logo="https://live.fanmingming.cn/tv/辽宁生活.png" group-title="辽宁地方",辽宁生活
 http://120.76.248.139/live/bfgd/4200000073.m3u8
-#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://live.fanmingming.cn/tv/辽宁经济.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225784/10000100000000060000000000000321_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁经济
+#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://tb.zbds.top/logo/辽宁经济.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225784/10000100000000060000000000000321_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁经济
 http://10.255.128.136/PLTV/88888888/224/3221225784/10000100000000060000000000000321_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://live.fanmingming.cn/tv/辽宁经济.png" group-title="辽宁地方",辽宁经济
+#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://tb.zbds.top/logo/辽宁经济.png" group-title="辽宁地方",辽宁经济
 http://120.76.248.139/live/bfgd/4200000480.m3u8
-#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://live.fanmingming.cn/tv/辽宁经济.png" group-title="辽宁地方",辽宁经济
+#EXTINF:-1 tvg-id="辽宁经济" tvg-name="辽宁经济" tvg-logo="https://tb.zbds.top/logo/辽宁经济.png" group-title="辽宁地方",辽宁经济
 http://120.76.248.139/live/bfgd/4200000076.m3u8
 #EXTINF:-1 tvg-id="辽宁北方" tvg-name="辽宁北方" tvg-logo="https://www.xn--rgv465a.top/tvlogo/辽宁北方.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225685/10000100000000060000000000000222_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁北方
 http://10.255.128.136/PLTV/88888888/224/3221225685/10000100000000060000000000000222_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="辽宁北方" tvg-name="辽宁北方" tvg-logo="https://www.xn--rgv465a.top/tvlogo/辽宁北方.png" group-title="辽宁地方",辽宁北方
 https://stream1.freetv.fun/liao-zhu-bei-fang-3.m3u8
-#EXTINF:-1 tvg-id="辽宁教育青少" tvg-name="辽宁教育青少" tvg-logo="https://live.fanmingming.cn/tv/辽宁教育青少.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226254/10000100000000060000000000801409_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁教育青少
+#EXTINF:-1 tvg-id="辽宁教育青少" tvg-name="辽宁教育青少" tvg-logo="https://tb.zbds.top/logo/辽宁教育青少.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226254/10000100000000060000000000801409_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁教育青少
 http://10.255.128.136/PLTV/88888888/224/3221226254/10000100000000060000000000801409_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="辽宁教育青少" tvg-name="辽宁教育青少" tvg-logo="https://live.fanmingming.cn/tv/辽宁教育青少.png" group-title="辽宁地方",辽宁教育青少
+#EXTINF:-1 tvg-id="辽宁教育青少" tvg-name="辽宁教育青少" tvg-logo="https://tb.zbds.top/logo/辽宁教育青少.png" group-title="辽宁地方",辽宁教育青少
 http://120.76.248.139/live/bfgd/4200000075.m3u8
 #EXTINF:-1 tvg-id="沈阳新闻综合" tvg-name="沈阳新闻综合" group-title="辽宁地方",沈阳新闻综合
 http://120.76.248.139/live/bfgd/4200000059.m3u8
