@@ -1,15 +1,11 @@
 {
   "name": "峰少源清单",
   "version": 2,
-  "exportedAt": 1793861148941,
+  "exportedAt": 1793866467397,
   "sources": [
     {
       "name": "非凡资源",
       "url": "https://api.ffzyapi.com/api.php/provide/vod"
-    },
-    {
-      "name": "卧龙资源",
-      "url": "https://collect.wolongzyw.com/api.php/provide/vod"
     },
     {
       "name": "最大资源",
@@ -116,10 +112,6 @@
       "url": "http://ffzy1.tv/api.php/provide/vod"
     },
     {
-      "name": "卧龙采集",
-      "url": "https://collect.wolongzyw.com/api.php/provide/vod"
-    },
-    {
       "name": "暴风APP",
       "url": "https://app.bfzyapi.com/api.php/provide/vod"
     },
@@ -158,10 +150,6 @@
     {
       "name": "丫丫点播",
       "url": "https://cj.yayazy.net/api.php/provide/vod"
-    },
-    {
-      "name": "卧龙CC",
-      "url": "https://collect.wolongzy.cc/api.php/provide/vod"
     },
     {
       "name": "无尽NET",
@@ -284,10 +272,6 @@
       "url": "https://91md.me/api.php/provide/vod"
     },
     {
-      "name": "💎 奥斯卡资源",
-      "url": "https://aosikazy.com/api.php/provide/vod"
-    },
-    {
       "name": "💎 奶香香",
       "url": "https://Naixxzy.com/api.php/provide/vod"
     },
@@ -322,10 +306,6 @@
     {
       "name": "TV-CK资源",
       "url": "https://ckzy.me/api.php/provide/vod"
-    },
-    {
-      "name": "TV-卧龙资源",
-      "url": "https://wolongzyw.com/api.php/provide/vod"
     },
     {
       "name": "TV-小猫咪资源",
@@ -404,10 +384,6 @@
       "url": "https://api.fczy888.me/api.php/provide/vod"
     },
     {
-      "name": "金马资源网",
-      "url": "https://api.jmzy.com/api.php/provide/vod"
-    },
-    {
       "name": "大地资源网络",
       "url": "https://dadiapi.com/api.php/provide/vod"
     },
@@ -422,10 +398,6 @@
     {
       "name": "辣椒资源黄黄",
       "url": "https://apilj.com/api.php/provide"
-    },
-    {
-      "name": "优质资源库1080zyk6.com高清",
-      "url": "https://api.yzzy-api.com/inc/ldg_api_all.php/provide/vod"
     },
     {
       "name": "iqiyi资源",
