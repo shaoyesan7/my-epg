@@ -49,6 +49,9 @@ def canon(name: str) -> str:
     for suf in ("综合", "频道"):
         if n.endswith(suf) and len(n) > len(suf) + 1:
             n = n[: -len(suf)]
+    # CCTV5+ 的各种写法（CCTV5PLUS / CCTV5+体育赛事 等）统一为 CCTV5+，避免与 CCTV5 混淆或被拆成多个频道
+    if n == "CCTV5PLUS" or n.startswith("CCTV5+"):
+        return "CCTV5+"
     return n
 
 
