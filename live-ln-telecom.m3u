@@ -129,6 +129,8 @@ http://10.255.128.136/PLTV/88888888/224/3221225731/10000100000000060000000000000
 http://10.255.128.136/PLTV/88888888/224/3221225732/10000100000000060000000000000269_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="延边卫视" tvg-name="延边卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226270/10000100000000060000000000863675_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",延边卫视
 http://10.255.128.136/PLTV/88888888/224/3221226270/10000100000000060000000000863675_0.smil/index.m3u8?fmt=ts2hls
+#EXTINF:-1 tvg-id="西藏卫视藏语" tvg-name="西藏卫视(藏语)" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226269/10000100000000060000000000863663_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",西藏卫视(藏语)
+http://10.255.128.136/PLTV/88888888/224/3221226269/10000100000000060000000000863663_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="辽宁卫视" tvg-name="辽宁卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225632/10000100000000060000000000000169_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁卫视
 http://10.255.128.136/PLTV/88888888/224/3221225632/10000100000000060000000000000169_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="辽宁都市" tvg-name="辽宁都市" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225680/10000100000000060000000000000217_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="辽宁地方",辽宁都市
@@ -185,7 +187,7 @@ http://10.255.128.136/PLTV/88888888/224/3221225832/10000100000000060000000000264
 http://10.255.128.136/PLTV/88888888/224/3221226186/10000100000000060000000000602976_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="CHC动作电影" tvg-name="CHC动作电影" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226231/10000100000000060000000000787860_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",CHC动作电影
 http://10.255.128.136/PLTV/88888888/224/3221226231/10000100000000060000000000787860_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CHC高清电影" tvg-name="CHC高清电影" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",CHC高清电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",CHC影迷电影
 http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="CHC家庭影院" tvg-name="CHC家庭影院" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787868_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",CHC家庭影院
 http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787868_0.smil/index.m3u8?fmt=ts2hls
