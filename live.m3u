@@ -11,11 +11,11 @@ http://10.255.128.136/PLTV/88888888/224/3221226205/10000100000000060000000000787
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=chcjt
 #EXTINF:-1 tvg-id="CHC家庭影院" tvg-name="CHC家庭影院" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC2.png" group-title="电影轮播",CHC家庭影院
 http://198.204.228.26/live/chcjt.m3u8
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://live.fanmingming.cn/tv/CHC影迷电影.png" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="电影轮播",CHC影迷电影
 http://10.255.128.136/PLTV/88888888/224/3221226206/10000100000000060000000000787863_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://live.fanmingming.cn/tv/CHC影迷电影.png" group-title="电影轮播",CHC影迷电影
 http://58.19.38.162:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/CHC1.png" group-title="电影轮播",CHC影迷电影
+#EXTINF:-1 tvg-id="CHC影迷电影" tvg-name="CHC影迷电影" tvg-logo="https://live.fanmingming.cn/tv/CHC影迷电影.png" group-title="电影轮播",CHC影迷电影
 http://122.228.73.138:2380/hw1live.rxip.sc96655.com.huan.tv/live/lnwsCHC-HDH265_4000.m3u8
 #EXTINF:-1 tvg-id="1905电影网" tvg-name="1905电影网" tvg-logo="https://gitee.com/suxuang/epglogo/raw/master/shuzi/1905dy.png" group-title="电影轮播",1905电影网
 http://8.138.7.223/tv/1905.php?id=LIVE8J4LTCXPI7QJ5
