@@ -1,7 +1,7 @@
 {
   "name": "峰少源清单",
   "version": 2,
-  "exportedAt": 1793860374944,
+  "exportedAt": 1793861148941,
   "sources": [
     {
       "name": "非凡资源",
@@ -314,6 +314,126 @@
     {
       "name": "💎 细胞采集",
       "url": "https://www.xxibaozyw.com/api.php/provide/vod"
+    },
+    {
+      "name": "TV-1080资源",
+      "url": "https://api.1080zyku.com/inc/api_mac10.php"
+    },
+    {
+      "name": "TV-CK资源",
+      "url": "https://ckzy.me/api.php/provide/vod"
+    },
+    {
+      "name": "TV-卧龙资源",
+      "url": "https://wolongzyw.com/api.php/provide/vod"
+    },
+    {
+      "name": "TV-小猫咪资源",
+      "url": "https://zy.xmm.hk/api.php/provide/vod"
+    },
+    {
+      "name": "TV-电影天堂资源",
+      "url": "http://caiji.dyttzyapi.com/api.php/provide/vod"
+    },
+    {
+      "name": "TV-豆瓣资源",
+      "url": "https://caiji.dbzy.tv/api.php/provide/vod"
+    },
+    {
+      "name": "TV-金鹰资源",
+      "url": "https://jyzyapi.com/api.php/provide/vod"
+    },
+    {
+      "name": "TV-魔爪资源",
+      "url": "https://mozhuazy.com/api.php/provide/vod"
+    },
+    {
+      "name": "TV-黑木耳",
+      "url": "https://json.heimuer.xyz/api.php/provide/vod"
+    },
+    {
+      "name": "TV-黑木耳点播",
+      "url": "https://json02.heimuer.xyz/api.php/provide/vod"
+    },
+    {
+      "name": "AV-AIvin",
+      "url": "http://lbapiby.com/api.php/provide/vod"
+    },
+    {
+      "name": "AV-souav资源",
+      "url": "https://api.souavzy.vip/api.php/provide/vod"
+    },
+    {
+      "name": "AV-玉兔资源",
+      "url": "https://apiyutu.com/api.php/provide/vod"
+    },
+    {
+      "name": "AV-色嗨国",
+      "url": "https://api.sexnguon.com/api.php/provide/vod"
+    },
+    {
+      "name": "AV-色猫资源",
+      "url": "https://api.maozyapi.com/inc/apijson_vod.php"
+    },
+    {
+      "name": "AV-辣椒资源",
+      "url": "https://apilj.com/api.php/provide/vod"
+    },
+    {
+      "name": "快播资源网站",
+      "url": "https://gayapi.com/api.php/provide/vod"
+    },
+    {
+      "name": "性吧资源",
+      "url": "https://xingba111.com/api.php/provide/vod"
+    },
+    {
+      "name": "爱短剧.cc",
+      "url": "https://www.aiduanju.cc/"
+    },
+    {
+      "name": "华为吧资源",
+      "url": "https://huawei8.live/api.php/provide/vod"
+    },
+    {
+      "name": "淘片资源",
+      "url": "https://taopianapi.com/cjapi/sda/vod"
+    },
+    {
+      "name": "蜂巢片库",
+      "url": "https://api.fczy888.me/api.php/provide/vod"
+    },
+    {
+      "name": "金马资源网",
+      "url": "https://api.jmzy.com/api.php/provide/vod"
+    },
+    {
+      "name": "大地资源网络",
+      "url": "https://dadiapi.com/api.php/provide/vod"
+    },
+    {
+      "name": "黄色资源啊啊",
+      "url": "https://hsckzy888.com/api.php/provide/vod"
+    },
+    {
+      "name": "快车资源阿",
+      "url": "https://caiji.kuaichezy.org/api.php/provide"
+    },
+    {
+      "name": "辣椒资源黄黄",
+      "url": "https://apilj.com/api.php/provide"
+    },
+    {
+      "name": "优质资源库1080zyk6.com高清",
+      "url": "https://api.yzzy-api.com/inc/ldg_api_all.php/provide/vod"
+    },
+    {
+      "name": "iqiyi资源",
+      "url": "https://www.iqiyizyapi.com/api.php/provide/vod"
+    },
+    {
+      "name": "七七影视",
+      "url": "https://www.qiqidys.com/api.php/provide/vod/"
     }
   ],
   "liveSources": [
