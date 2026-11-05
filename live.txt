@@ -130,6 +130,7 @@ CCTV-2,http://bztv.tvbus.cc:8081/cdnlive/cctv2.m3u8
 CCTV-3,http://10.255.128.136/PLTV/88888888/224/3221225635/10000100000000060000000000000172_0.smil/index.m3u8?fmt=ts2hls
 CCTV-3,http://63.141.230.178:82/gslb/zbdq5.m3u8?id=cctv3hd
 CCTV-3,http://107.150.60.122/live/cctv3hd.m3u8
+CCTV-4,http://10.255.128.136/PLTV/88888888/224/3221225661/10000100000000060000000000000198_0.smil/index.m3u8?fmt=ts2hls
 CCTV-4,http://74.91.26.218:82/live/cctv4hd.m3u8
 CCTV-4,http://107.150.60.122/live/cctv4hd.m3u8
 CCTV-4,http://114.254.89.131:2222/rtp/239.3.1.105:8092
@@ -197,7 +198,9 @@ CCTV-Women's Fashion SD (1080p),http://38.75.136.137:98/gslb/dsdqpub/nxss.m3u8?a
 CCTV-World Geography SD (1080p),http://38.75.136.137:98/gslb/dsdqpub/sjdl.m3u8?auth=testpub
 CCTV-世界地理,http://www.lizhinas.top:1009/rtp/239.252.219.93:5140
 CCTV中学生,http://t.061899.xyz/tl/tl.php?id=zxs
+CCTV-兵器科技,http://10.255.128.136/PLTV/88888888/224/3221225797/10000100000000060000000000000423_0.smil/index.m3u8?fmt=ts2hls
 CCTV-兵器科技,http://www.lizhinas.top:1009/rtp/239.252.219.98:5140
+CCTV-兵器科技,https://live.264788.xyz/channel/bingqikeji?streamid=530cb4e58bbc48b7fc26f5e0a2e47966&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 CCTV-卫生健康,http://nas.hssvm.com:8888/udp/225.1.1.210:5002
 CCTV发现之旅,http://t.061899.xyz/tl/tl.php?id=fxzl
 CCTV-央视台球,http://www.lizhinas.top:1009/rtp/239.252.219.80:5140
@@ -228,7 +231,6 @@ CGTN阿语,http://espanol-liveali.cgtn.com/hls/LSveOGBaBw41Ea7ukkVAUdKQ220802LST
 央视台球,http://10.255.128.136/PLTV/88888888/224/3221225798/10000100000000060000000000000424_0.smil/index.m3u8?fmt=ts2hls
 央视台球,http://107.150.60.122/live/ystq.m3u8
 央视台球,http://63.141.230.178:82/gslb/zbdq5.m3u8?id=ystq
-CCTV-4国际,http://10.255.128.136/PLTV/88888888/224/3221225661/10000100000000060000000000000198_0.smil/index.m3u8?fmt=ts2hls
 CCTV-16 4K奥林匹克,http://10.255.128.136/PLTV/88888888/224/3221226219/10000100000000060000000000712172_0.smil/index.m3u8?fmt=ts2hls
 CGTN-英语新闻,http://10.255.128.136/PLTV/88888888/224/3221225791/10000100000000060000000000000360_0.smil/index.m3u8?fmt=ts2hls
 CGTN-纪录频道(国际版),http://10.255.128.136/PLTV/88888888/224/3221225792/10000100000000060000000000000361_0.smil/index.m3u8?fmt=ts2hls
@@ -911,9 +913,6 @@ RT News（英语国际）,https://rt-glb.rttv.com/dvr/rtnews/playlist_4500Kb.m3u
 倩女幽魂道道道,http://jsmov2.a.yximgs.com/bs3/video-hls/5216294367991385255_hlsb.m3u8
 八大戏剧台,http://61.221.215.25:8800/hls/39/index.m3u8
 六安公共,http://ls.qingting.fm/live/1794199.m3u8
-兵器科技,http://10.255.128.136/PLTV/88888888/224/3221225797/10000100000000060000000000000423_0.smil/index.m3u8?fmt=ts2hls
-兵器科技,https://live.264788.xyz/channel/bingqikeji?streamid=530cb4e58bbc48b7fc26f5e0a2e47966&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
-兵器科技,https://live.264788.xyz/channel/bingqikeji?streamid=6fc55a0966bdad1e1cdf39a4d37dd776&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 冰冰影剧,http://www.goodiptv.club/douyu/74374
 刑事侦缉档案,https://live.metshop.top/huya/29465856
 刘德华电影,https://live.metshop.top/huya/11342424
