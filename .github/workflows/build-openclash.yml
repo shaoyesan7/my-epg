@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -23,10 +23,21 @@ jobs:
         run: curl -fsSL --retry 3 "$SUB_URL" -o sub-raw.yaml
       - name: Generate config
         run: python3 openclash-gen/gen.py sub-raw.yaml
-      - name: Commit if changed
+      - name: Publish to secret gist
+        env:
+          GH_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
         run: |
-          git config user.name 'github-actions'
-          git config user.email 'actions@github.com'
-          git add openclash.yaml
-          git diff --cached --quiet || git commit -m 'chore: update openclash config'
-          git push
+          python3 - <<'PY'
+          import json, os, urllib.request
+          content = open('openclash.yaml', encoding='utf-8').read()
+          data = json.dumps({"files": {"openclash.yaml": {"content": content}}}).encode('utf-8')
+          req = urllib.request.Request(
+              'https://api.github.com/gists/' + os.environ['GIST_ID'],
+              data=data, method='PATCH',
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                       'Accept': 'application/vnd.github+json',
+                       'Content-Type': 'application/json'})
+          with urllib.request.urlopen(req) as r:
+              print('gist updated, HTTP', r.status)
+          PY
