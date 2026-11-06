@@ -1,0 +1,32 @@
+name: build-openclash
+
+on:
+  schedule:
+    - cron: '15 0,12 * * *'   # UTC 00:15 / 12:15 = Beijing 08:15 / 20:15
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyyaml
+      - name: Fetch subscription
+        env:
+          SUB_URL: ${{ secrets.SUB_URL }}
+        run: curl -fsSL --retry 3 "$SUB_URL" -o sub-raw.yaml
+      - name: Generate config
+        run: python3 openclash-gen/gen.py sub-raw.yaml
+      - name: Commit if changed
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'actions@github.com'
+          git add openclash.yaml
+          git diff --cached --quiet || git commit -m 'chore: update openclash config'
+          git push
