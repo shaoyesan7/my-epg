@@ -377,6 +377,8 @@ rules:
 - DOMAIN-SUFFIX,tiktokv.com,🎵 国际音乐
 - RULE-SET,Telegram,📲 Telegram
 - GEOSITE,telegram,📲 Telegram
+- DOMAIN-SUFFIX,cctv05.com,🇺🇸 美国节点
+- DOMAIN-SUFFIX,97img.com,🇺🇸 美国节点
 - GEOSITE,category-porn,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.com,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.org,🔞 成人网站
