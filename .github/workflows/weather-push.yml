@@ -1,0 +1,19 @@
+name: Daily Weather Push
+
+on:
+  schedule:
+    - cron: '30 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Send weather to WeChat
+        env:
+          SCT_SENDKEY: ${{ secrets.SCT_SENDKEY }}
+        run: python weather/weather_push.py
