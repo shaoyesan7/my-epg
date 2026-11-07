@@ -155,14 +155,28 @@ def main():
 
     desp = "\n".join(lines)
 
+    # Card summary: the essentials, visible in the WeChat chat list and
+    # notification without opening the message.
+    short = (f"{WMO.get(cur['weather_code'], '—')} "
+             f"{d0['temperature_2m_min']:.0f}~{d0['temperature_2m_max']:.0f}°C，"
+             f"降水{d0['precipitation_probability_max'] or 0}%")
+    if aqi_max is not None:
+        short += f"，AQI {aqi_max} {aqi_level(aqi_max)}"
+    if (daily["precipitation_probability_max"][1] or 0) >= 50:
+        short += (f"；明日{WMO.get(daily['weather_code'][1], '')} "
+                  f"{daily['temperature_2m_min'][1]:.0f}~"
+                  f"{daily['temperature_2m_max'][1]:.0f}°C")
+
     key = os.environ.get("SCT_SENDKEY", "").strip()
     if not key:
         print("[DRY RUN] no SCT_SENDKEY in env; message would be:\n")
         print("TITLE:", title)
+        print("SHORT:", short)
         print(desp)
         return 0
 
-    body = urllib.parse.urlencode({"title": title, "desp": desp}).encode()
+    body = urllib.parse.urlencode(
+        {"title": title, "desp": desp, "short": short}).encode()
     req = urllib.request.Request(
         f"https://sctapi.ftqq.com/{key}.send", data=body, method="POST")
     with urllib.request.urlopen(req, timeout=30) as resp:
