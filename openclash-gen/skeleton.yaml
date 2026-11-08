@@ -380,6 +380,11 @@ rules:
 - DOMAIN-SUFFIX,cctv05.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,97img.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,xtremestream.xyz,🇺🇸 美国节点
+- DOMAIN-SUFFIX,missav.live,🇺🇸 美国节点
+- DOMAIN-SUFFIX,missav.ws,🇺🇸 美国节点
+- DOMAIN-SUFFIX,missav.ai,🇺🇸 美国节点
+- DOMAIN-SUFFIX,fourhoi.com,🇺🇸 美国节点
+- DOMAIN-SUFFIX,surrit.com,🇺🇸 美国节点
 - GEOSITE,category-porn,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.com,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.org,🔞 成人网站
