@@ -385,6 +385,7 @@ rules:
 - DOMAIN-SUFFIX,missav.ai,🇺🇸 美国节点
 - DOMAIN-SUFFIX,fourhoi.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,surrit.com,🇺🇸 美国节点
+- DOMAIN-SUFFIX,workers.dev,🇺🇸 美国节点
 - GEOSITE,category-porn,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.com,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.org,🔞 成人网站
