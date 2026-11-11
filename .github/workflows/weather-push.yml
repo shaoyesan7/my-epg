@@ -5,6 +5,10 @@ on:
     - cron: '30 23 * * *'
   workflow_dispatch:
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -13,7 +17,50 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Check whether already sent today
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          already = False
+          try:
+              repo = os.environ["GITHUB_REPOSITORY"]
+              current = str(os.environ["GITHUB_RUN_ID"])
+              req = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + "/actions/workflows/weather-push.yml/runs?per_page=30",
+                  headers={
+                      "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                      "Accept": "application/vnd.github+json",
+                      "User-Agent": "weather-guard",
+                  },
+              )
+              data = json.load(urllib.request.urlopen(req, timeout=30))
+              tz = ZoneInfo("Asia/Shanghai")
+              today = datetime.now(tz).date()
+              for r in data.get("workflow_runs", []):
+                  if str(r.get("id")) == current:
+                      continue
+                  if r.get("status") == "completed" and r.get("conclusion") == "success":
+                      created = datetime.fromisoformat(
+                          r["created_at"].replace("Z", "+00:00")
+                      ).astimezone(tz).date()
+                      if created == today:
+                          already = True
+                          break
+          except Exception as e:
+              print("guard check failed, sending anyway:", e)
+              already = False
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("already=" + ("true" if already else "false") + "\n")
+          print("already sent today (Beijing):", already)
+          PYEOF
       - name: Send weather to WeChat
+        if: steps.guard.outputs.already != 'true'
         env:
           SCT_SENDKEY: ${{ secrets.SCT_SENDKEY }}
         run: python weather/weather_push.py
