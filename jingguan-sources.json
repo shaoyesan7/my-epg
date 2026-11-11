@@ -406,6 +406,10 @@
     {
       "name": "七七影视",
       "url": "https://www.qiqidys.com/api.php/provide/vod/"
+    },
+    {
+      "name": "豆瓣浏览",
+      "url": "https://douban-tv.shaoyesan7.workers.dev/"
     }
   ],
   "liveSources": [
