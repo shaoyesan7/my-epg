@@ -387,7 +387,7 @@ rules:
 - DOMAIN-SUFFIX,surrit.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,workers.dev,🇺🇸 美国节点
 - DOMAIN-SUFFIX,perverzija.com,🇺🇸 美国节点
-- DOMAIN-SUFFIX,jable.tv,🇺🇸 美国节点
+- DOMAIN-SUFFIX,jable.tv,DIRECT
 - DOMAIN-SUFFIX,yaseporn.com,DIRECT
 - GEOSITE,category-porn,🔞 成人网站
 - DOMAIN-SUFFIX,pornhub.com,🔞 成人网站
