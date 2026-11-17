@@ -74,14 +74,6 @@ hosts:
   anysex.com:
   - 104.21.50.99
   - 172.67.204.28
-proxy-providers:
-  free:
-    type: http
-    url: https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/clash.yml
-    interval: 86400
-    path: ./providers/free.yaml
-    health-check:
-      enable: false
 proxies: []
 proxy-groups:
 - name: 🚀 节点选择
