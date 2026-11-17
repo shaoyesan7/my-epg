@@ -70,10 +70,6 @@ dns:
     geosite:geolocation-!cn:
     - https://dns.google/dns-query
     - https://cloudflare-dns.com/dns-query
-hosts:
-  anysex.com:
-  - 104.21.50.99
-  - 172.67.204.28
 proxies: []
 proxy-groups:
 - name: 🚀 节点选择
@@ -391,7 +387,6 @@ rules:
 - DOMAIN-SUFFIX,surrit.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,workers.dev,🇺🇸 美国节点
 - DOMAIN-SUFFIX,perverzija.com,🇺🇸 美国节点
-- DOMAIN-SUFFIX,anysex.com,🇯🇵 日本节点
 - DOMAIN-SUFFIX,jable.tv,DIRECT
 - DOMAIN-SUFFIX,yaseporn.com,DIRECT
 - GEOSITE,category-porn,🔞 成人网站
