@@ -74,6 +74,14 @@ hosts:
   anysex.com:
   - 104.21.50.99
   - 172.67.204.28
+proxy-providers:
+  free:
+    type: http
+    url: https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/clash.yml
+    interval: 86400
+    path: ./providers/free.yaml
+    health-check:
+      enable: false
 proxies: []
 proxy-groups:
 - name: 🚀 节点选择
@@ -89,20 +97,20 @@ proxy-groups:
   - 🇺🇸 美国节点
   - 🇳🇱 荷兰节点
   - DIRECT
-  include-all-proxies: true
+  include-all: true
 - name: ♻️ 自动选择
   type: url-test
   url: https://www.gstatic.com/generate_204
   interval: 300
   tolerance: 50
   lazy: true
-  include-all-proxies: true
+  include-all: true
 - name: 🔯 故障转移
   type: fallback
   url: https://www.gstatic.com/generate_204
   interval: 180
   lazy: true
-  include-all-proxies: true
+  include-all: true
 - name: 🇭🇰 香港节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -110,7 +118,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(港|香港|HK|Hong Kong|HKG)
-  include-all-proxies: true
+  include-all: true
 - name: 🇹🇼 台湾节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -118,7 +126,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(台|台湾|台北|新北|TW|Taiwan|TPE)
-  include-all-proxies: true
+  include-all: true
 - name: 🇯🇵 日本节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -126,7 +134,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(日|日本|东京|大阪|JP|Japan|Tokyo|Osaka|NRT|HND)
-  include-all-proxies: true
+  include-all: true
 - name: 🇰🇷 韩国节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -134,7 +142,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(韩|韩国|首尔|KR|Korea|Seoul|ICN)
-  include-all-proxies: true
+  include-all: true
 - name: 🇸🇬 新加坡节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -142,7 +150,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(新加坡|狮城|SG|Singapore|SIN)
-  include-all-proxies: true
+  include-all: true
 - name: 🇺🇸 美国节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -150,7 +158,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(美|美国|洛杉矶|圣何塞|西雅图|纽约|达拉斯|US|USA|America|LAX|SJC|SEA)
-  include-all-proxies: true
+  include-all: true
 - name: 🇳🇱 荷兰节点
   type: url-test
   url: https://www.gstatic.com/generate_204
@@ -158,7 +166,7 @@ proxy-groups:
   tolerance: 50
   lazy: true
   filter: (?i)(荷兰|阿姆斯特丹|NL|Netherlands|Amsterdam|AMS)
-  include-all-proxies: true
+  include-all: true
 - name: 🤖 AI服务
   type: select
   proxies:
@@ -392,7 +400,6 @@ rules:
 - DOMAIN-SUFFIX,workers.dev,🇺🇸 美国节点
 - DOMAIN-SUFFIX,perverzija.com,🇺🇸 美国节点
 - DOMAIN-SUFFIX,anysex.com,🇯🇵 日本节点
-- DOMAIN-SUFFIX,ip.sb,🇺🇸 美国节点
 - DOMAIN-SUFFIX,jable.tv,DIRECT
 - DOMAIN-SUFFIX,yaseporn.com,DIRECT
 - GEOSITE,category-porn,🔞 成人网站
