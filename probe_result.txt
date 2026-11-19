@@ -1,0 +1,33 @@
+cdn-probe run 2026-11-19T17:10:47Z
+--- curl https://cdn-1.ggjav.com/media/video/large_301262.jpg
+curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+http_code=000 size=0 time=0.251637
+curl_exit=60
+--- curl https://cdn-1.ggjav.com/media/video/small_301262.jpg
+curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+http_code=000 size=0 time=0.221655
+curl_exit=60
+--- curl https://cdn-1.ggjav.com/media/model/18825.jpg
+curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+http_code=000 size=0 time=0.259778
+curl_exit=60
+--- curl https://hohoj.tv/
+http_code=200 size=119658 time=0.111499
+curl_exit=0
+--- curl_cffi chrome impersonation large_301262.jpg
+ERROR Failed to perform, curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20). See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
