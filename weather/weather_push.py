@@ -8,6 +8,7 @@ Data: Open-Meteo forecast + air-quality APIs (free, no key).
 import json
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime
@@ -28,10 +29,29 @@ WEEKDAY = ["一", "二", "三", "四", "五", "六", "日"]
 COMPASS = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"]
 
 
-def fetch(url):
+def fetch(url, attempts=3):
+    """Fetch JSON with retries.
+
+    Open-Meteo occasionally fails the TLS handshake from the GitHub
+    Actions runner (TimeoutError: _ssl.c:994, handshake timed out) —
+    that killed the 07:30 push on 2026-11-17 and again on 2026-11-19,
+    before ServerChan was ever reached. A transient handshake failure
+    is worth retrying: 3 attempts, 10s then 20s apart, still well
+    inside the workflow's runtime.
+    """
     req = urllib.request.Request(url, headers={"User-Agent": "weather-push/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    last_exc = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except Exception as exc:  # noqa: BLE001 - retry any transient failure
+            last_exc = exc
+            print(f"fetch attempt {attempt}/{attempts} failed: {exc}",
+                  file=sys.stderr)
+            if attempt < attempts:
+                time.sleep(10 * attempt)
+    raise last_exc
 
 
 def beaufort(kmh):
