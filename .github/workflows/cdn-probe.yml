@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Probe CDN
         run: |
+          set +e
           OUT=probe_result.txt
           echo "cdn-probe run $(date -u +%FT%TZ)" > $OUT
           probe() {
