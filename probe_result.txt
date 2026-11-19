@@ -1,4 +1,4 @@
-cdn-probe run 2026-11-19T17:10:47Z
+cdn-probe run 2026-11-19T17:21:27Z
 --- curl https://cdn-1.ggjav.com/media/video/large_301262.jpg
 curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
 More details here: https://curl.se/docs/sslcerts.html
@@ -6,7 +6,7 @@ More details here: https://curl.se/docs/sslcerts.html
 curl failed to verify the legitimacy of the server and therefore could not
 establish a secure connection to it. To learn more about this situation and
 how to fix it, please visit the webpage mentioned above.
-http_code=000 size=0 time=0.251637
+http_code=000 size=0 time=0.277567
 curl_exit=60
 --- curl https://cdn-1.ggjav.com/media/video/small_301262.jpg
 curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
@@ -15,7 +15,7 @@ More details here: https://curl.se/docs/sslcerts.html
 curl failed to verify the legitimacy of the server and therefore could not
 establish a secure connection to it. To learn more about this situation and
 how to fix it, please visit the webpage mentioned above.
-http_code=000 size=0 time=0.221655
+http_code=000 size=0 time=0.232037
 curl_exit=60
 --- curl https://cdn-1.ggjav.com/media/model/18825.jpg
 curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)
@@ -24,10 +24,23 @@ More details here: https://curl.se/docs/sslcerts.html
 curl failed to verify the legitimacy of the server and therefore could not
 establish a secure connection to it. To learn more about this situation and
 how to fix it, please visit the webpage mentioned above.
-http_code=000 size=0 time=0.259778
+http_code=000 size=0 time=0.209496
 curl_exit=60
 --- curl https://hohoj.tv/
-http_code=200 size=119658 time=0.111499
+http_code=200 size=119566 time=0.098273
 curl_exit=0
 --- curl_cffi chrome impersonation large_301262.jpg
 ERROR Failed to perform, curl: (60) SSL certificate OpenSSL verify result: unable to get local issuer certificate (20). See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
+--- curl -k https://cdn-1.ggjav.com/media/video/large_301262.jpg
+http_code=200 size=110024 time=0.492537
+curl_k_exit=0
+--- curl -k https://cdn-1.ggjav.com/media/video/small_301262.jpg
+http_code=200 size=30377 time=0.330346
+curl_k_exit=0
+--- curl -k https://cdn-1.ggjav.com/media/model/18825.jpg
+http_code=200 size=7850 time=0.274151
+curl_k_exit=0
+--- python requests verify=False large_301262.jpg
+/usr/lib/python3/dist-packages/urllib3/connectionpool.py:1109: InsecureRequestWarning: Unverified HTTPS request is being made to host 'cdn-1.ggjav.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+verify=False status=200 content-type=image/jpeg len=110024
