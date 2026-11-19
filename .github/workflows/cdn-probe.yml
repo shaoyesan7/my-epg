@@ -39,6 +39,24 @@ jobs:
           except Exception as e:
               print('ERROR %s' % e)
           PYEOF
+          probe_k() {
+            echo "--- curl -k $1" >> $OUT
+            curl -skS -o /dev/null -w "http_code=%{http_code} size=%{size_download} time=%{time_total}\n" --max-time 30 "$1" >> $OUT 2>&1
+            echo "curl_k_exit=$?" >> $OUT
+          }
+          probe_k "https://cdn-1.ggjav.com/media/video/large_301262.jpg"
+          probe_k "https://cdn-1.ggjav.com/media/video/small_301262.jpg"
+          probe_k "https://cdn-1.ggjav.com/media/model/18825.jpg"
+          echo "--- python requests verify=False large_301262.jpg" >> $OUT
+          python3 - >> $OUT 2>&1 <<'PYEOF'
+          import requests
+          u = 'https://cdn-1.ggjav.com/media/video/large_301262.jpg'
+          try:
+              r = requests.get(u, verify=False, timeout=30)
+              print('verify=False status=%s content-type=%s len=%s' % (r.status_code, r.headers.get('content-type'), len(r.content)))
+          except Exception as e:
+              print('verify=False ERROR %s' % e)
+          PYEOF
           cat $OUT
       - name: Commit result
         run: |
