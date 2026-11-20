@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>峰少工具箱</title>
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+    </style>
+    <style>
+      :root {
+        --bg: #f4f2ec;
+        --surface: #fffdf8;
+        --surface-2: #eceade;
+        --ink: #1c1a15;
+        --ink-2: #5c574c;
+        --line: #d9d4c4;
+        --accent: #c2410c;
+        --accent-ink: #ffffff;
+        --accent-soft: #fdeadd;
+        --ok: #177245;
+        --err: #b3261e;
+        --code-bg: #17150f;
+        --code-ink: #f3ead8;
+        --radius: 10px;
+        --shadow: 0 1px 2px rgba(28,26,21,.08), 0 4px 14px rgba(28,26,21,.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14120e;
+          --surface: #1e1b15;
+          --surface-2: #29251c;
+          --ink: #f0ead9;
+          --ink-2: #a89f8a;
+          --line: #3a352a;
+          --accent: #f0732f;
+          --accent-ink: #1c1005;
+          --accent-soft: #3a2413;
+          --ok: #4cc38a;
+          --err: #ff8a80;
+          --code-bg: #0c0b08;
+          --code-ink: #f3ead8;
+          --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        line-height: 1.55;
+      }
+      .mono { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 64px; }
+
+      /* ---------- header ---------- */
+      header.top { padding: 14px 0 6px; }
+      .top h1 {
+        margin: 0;
+        font-size: clamp(26px, 5vw, 38px);
+        font-weight: 800;
+        letter-spacing: .01em;
+      }
+      .top h1 .box-mark {
+        display: inline-block;
+        background: var(--accent);
+        color: var(--accent-ink);
+        border-radius: 8px;
+        padding: 0 10px;
+        margin-right: 8px;
+        transform: translateY(-2px);
+      }
+      .top p { margin: 8px 0 0; color: var(--ink-2); font-size: 15px; max-width: 40em; }
+      .clockbar {
+        margin-top: 14px;
+        display: flex; flex-wrap: wrap; gap: 8px 18px;
+        font-size: 13px; color: var(--ink-2);
+        border-top: 1px dashed var(--line);
+        border-bottom: 1px dashed var(--line);
+        padding: 8px 2px;
+      }
+      .clockbar b { color: var(--ink); font-weight: 600; }
+
+      /* ---------- search & filter ---------- */
+      .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 6px; align-items: center; }
+      .search {
+        flex: 1 1 220px; display: flex; align-items: center; gap: 8px;
+        background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+        padding: 0 12px; min-height: 44px;
+      }
+      .search svg { flex: none; opacity: .55; }
+      .search input[type="text"] { border: 0; background: none; outline: none; color: var(--ink); font-size: 15px; width: 100%; min-height: 42px; padding: 0; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip {
+        border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+        border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; min-height: 38px;
+      }
+      .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+
+      /* ---------- tool grid ---------- */
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-top: 14px; }
+      .card {
+        text-align: left; width: 100%;
+        background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+        padding: 16px; cursor: pointer; box-shadow: var(--shadow);
+        display: flex; flex-direction: column; gap: 6px; color: var(--ink);
+        font: inherit;
+      }
+      .card:hover { border-color: var(--accent); }
+      .card:focus-visible, .chip:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      .card .ic {
+        width: 40px; height: 40px; border-radius: 8px;
+        background: var(--accent-soft); color: var(--accent);
+        display: grid; place-items: center;
+      }
+      .card h2 { margin: 2px 0 0; font-size: 17px; font-weight: 700; }
+      .card p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+      .card .tag { margin-top: auto; padding-top: 6px; font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: .04em; }
+      .empty { padding: 40px 0; text-align: center; color: var(--ink-2); }
+
+      /* ---------- tool view ---------- */
+      .backbar { margin: 18px 0 4px; }
+      .backbtn {
+        background: none; border: 1px solid var(--line); border-radius: var(--radius);
+        color: var(--ink); padding: 8px 16px; font-size: 15px; cursor: pointer; min-height: 42px;
+        background: var(--surface);
+      }
+      .tool-head h2 { margin: 10px 0 4px; font-size: clamp(22px, 4vw, 30px); font-weight: 800; }
+      .tool-head p { margin: 0 0 16px; color: var(--ink-2); font-size: 14.5px; max-width: 44em; }
+      .panel {
+        background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+        box-shadow: var(--shadow); padding: 18px;
+      }
+      .panel + .panel { margin-top: 14px; }
+      label.flabel { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 0 0 6px; letter-spacing: .02em; }
+      textarea, input[type="text"], input[type="number"], select {
+        width: 100%; background: var(--bg); color: var(--ink);
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 10px 12px; font-size: 15px; font-family: inherit;
+      }
+      textarea { min-height: 130px; resize: vertical; line-height: 1.5; }
+      textarea.mono, input.mono { font-size: 13.5px; }
+      .row { display: flex; flex-wrap: wrap; gap: 10px; }
+      .row > * { flex: 1 1 180px; }
+      .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+      .btn {
+        border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+        border-radius: 8px; padding: 9px 18px; font-size: 15px; cursor: pointer; min-height: 42px; font-weight: 600;
+      }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .btn:active { transform: translateY(1px); }
+      .out {
+        background: var(--code-bg); color: var(--code-ink);
+        border-radius: 8px; padding: 14px; margin-top: 12px;
+        font-size: 13.5px; white-space: pre-wrap; word-break: break-all;
+        max-height: 380px; overflow: auto; min-height: 52px;
+      }
+      .out:empty::before { content: "结果会显示在这里"; opacity: .45; }
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
+      .stat { background: var(--surface-2); border-radius: 8px; padding: 12px; text-align: center; }
+      .stat b { display: block; font-size: 22px; font-weight: 800; }
+      .stat span { font-size: 12.5px; color: var(--ink-2); }
+      .msg { margin-top: 10px; font-size: 14px; min-height: 1.4em; }
+      .msg.ok { color: var(--ok); }
+      .msg.err { color: var(--err); }
+      .checks { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; }
+      .checks label { display: inline-flex; align-items: center; gap: 7px; font-size: 14.5px; padding: 8px 2px; cursor: pointer; }
+      .checks input { width: 19px; height: 19px; accent-color: var(--accent); }
+      input[type="range"] { width: 100%; accent-color: var(--accent); min-height: 36px; }
+      .qrbox { display: grid; place-items: center; padding: 18px 0 6px; }
+      .qrbox canvas, .qrbox img { background: #fff; padding: 12px; border-radius: 8px; max-width: 100%; height: auto; }
+      table.mini { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+      table.mini th, table.mini td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      table.mini th { color: var(--ink-2); font-weight: 600; font-size: 12.5px; }
+      .swatch { height: 74px; border-radius: 8px; border: 1px solid var(--line); margin-top: 12px; }
+      .hidden { display: none !important; }
+
+      footer { margin-top: 44px; border-top: 1px dashed var(--line); padding-top: 14px; color: var(--ink-2); font-size: 13px; }
+
+      /* toast */
+      #toast {
+        position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+        background: var(--ink); color: var(--bg); padding: 10px 20px; border-radius: 999px;
+        font-size: 14.5px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+        max-width: 88vw; text-align: center;
+      }
+      #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+      @media (max-width: 560px) {
+        .grid { grid-template-columns: 1fr 1fr; }
+        .card { padding: 13px; }
+        .card p { font-size: 12.5px; }
+        .panel { padding: 14px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- ============ HOME VIEW ============ -->
+      <div id="view-home">
+        <header class="top">
+          <h1><span class="box-mark">峰少</span>工具箱</h1>
+          <p>平时折腾直播源、订阅、编码时顺手要用的小工具，都攒在这儿了。点开即用，不用装任何东西。</p>
+          <div class="clockbar mono">
+            <span>现在 <b id="clock-now">—</b></span>
+            <span>时间戳（秒）<b id="clock-ts">—</b></span>
+            <span>丹东 <b id="clock-week">—</b></span>
+          </div>
+        </header>
+
+        <div class="controls">
+          <div class="search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+            <input id="search" type="text" placeholder="搜工具，比如：直播源、时间戳、二维码…" aria-label="搜索工具" />
+          </div>
+          <div class="chips" id="chips" role="group" aria-label="分类筛选"></div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+        <p class="empty hidden" id="grid-empty">没找到这个工具，换个词试试。</p>
+
+        <footer>所有工具都在你自己的浏览器里运行，粘贴的内容不会上传到任何服务器。</footer>
+      </div>
+
+      <!-- ============ TOOL VIEW ============ -->
+      <div id="view-tool" class="hidden">
+        <div class="backbar"><button class="backbtn" id="btn-back">← 全部工具</button></div>
+        <div class="tool-head">
+          <h2 id="tool-title"></h2>
+          <p id="tool-desc"></p>
+        </div>
+        <div id="tool-body"></div>
+      </div>
+
+    </div>
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+    (function () {
+      "use strict";
+
+      /* ---------------- helpers ---------------- */
+      var $ = function (sel, root) { return (root || document).querySelector(sel); };
+      function toast(text) {
+        var t = $("#toast");
+        t.textContent = text;
+        t.classList.add("show");
+        clearTimeout(t._h);
+        t._h = setTimeout(function () { t.classList.remove("show"); }, 1800);
+      }
+      function copyText(text, label) {
+        function done() { toast((label || "内容") + "已复制"); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+        } else { fallback(); }
+        function fallback() {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); done(); } catch (e) { toast("复制失败，请长按手动复制"); }
+          document.body.removeChild(ta);
+        }
+      }
+      function download(name, text) {
+        var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      }
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+      }
+      function pad(n, w) { n = String(n); while (n.length < (w || 2)) n = "0" + n; return n; }
+      function fmtDate(d) {
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
+          " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+      }
+
+      /* ---------------- clock ---------------- */
+      var WEEK = ["日", "一", "二", "三", "四", "五", "六"];
+      function tickClock() {
+        var now = new Date();
+        var parts = {};
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+        }).formatToParts(now).forEach(function (pt) { parts[pt.type] = pt.value; });
+        var wd = new Date(Date.UTC(+parts.year, +parts.month - 1, +parts.day)).getUTCDay();
+        $("#clock-now").textContent = parts.year + "-" + parts.month + "-" + parts.day +
+          " " + parts.hour + ":" + parts.minute + ":" + parts.second;
+        $("#clock-ts").textContent = Math.floor(now.getTime() / 1000);
+        $("#clock-week").textContent = "星期" + WEEK[wd];
+      }
+      tickClock(); setInterval(tickClock, 1000);
+
+      /* ---------------- tool registry ---------------- */
+      var ICONS = {
+        tv: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>',
+        clock: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+        json: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-1"/></svg>',
+        b64: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17 10 7M14 7l6 10M6.5 12h1M16 12h1.5" stroke-linecap="round"/></svg>',
+        link: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+        qr: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM21 14v.01M14 21v.01M18 18h3v3h-3z"/></svg>',
+        key: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="15" r="4.5"/><path d="m11.2 11.8 8.3-8.3M17 5l2.5 2.5M14 8l2 2"/></svg>',
+        hash: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3 7 21M17 3l-2 18M4 8h17M3 16h17" stroke-linecap="round"/></svg>',
+        uuid: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01" stroke-linecap="round" stroke-width="3"/></svg>',
+        text: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6V4h14v2M12 4v16M9 20h6" stroke-linecap="round"/></svg>',
+        lines: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13" stroke-linecap="round"/></svg>',
+        color: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-.9-.7-1.4-.7-2.2 0-.9.7-1.5 1.7-1.5H17a4.5 4.5 0 0 0 4.5-4.5C21.5 6.6 17.2 3 12 3Z"/><circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="16.5" cy="10.5" r="1" fill="currentColor"/></svg>'
+      };
+
+      var TOOLS = [
+        { id: "live",   cat: "影音源", icon: "tv",    name: "直播源整理",   desc: "M3U 与 TXT 互转、按分组统计、去重、只留能分组的频道，粘贴进来就能整。", kw: "m3u txt 直播源 频道 iptv 转换 去重 分组" },
+        { id: "ts",     cat: "时间",   icon: "clock", name: "时间戳转换",   desc: "Unix 时间戳（秒/毫秒）和日期时间互转，EPG、日志排查常用。", kw: "timestamp unix 时间 日期 epg" },
+        { id: "json",   cat: "编码",   icon: "json",  name: "JSON 格式化",  desc: "格式化、压缩、校验 JSON，订阅配置和接口返回粘进来一眼看清。", kw: "json 格式化 压缩 校验 配置" },
+        { id: "base64", cat: "编码",   icon: "b64",   name: "Base64 编解码", desc: "文本与 Base64 互转，支持中文；订阅链接里那串乱码就是它。", kw: "base64 编码 解码 订阅" },
+        { id: "url",    cat: "编码",   icon: "link",  name: "URL 编解码",   desc: "encodeURIComponent 编解码，处理带中文和特殊符号的链接。", kw: "url encode decode 链接 编码" },
+        { id: "qr",     cat: "日常",   icon: "qr",    name: "二维码生成",   desc: "把链接或文字生成二维码，手机扫一下就过去了。", kw: "二维码 qr 链接 扫码" },
+        { id: "pwd",    cat: "日常",   icon: "key",   name: "随机密码生成", desc: "本地生成强密码，可调长度和字符种类，一次出一批。", kw: "密码 password 随机 生成" },
+        { id: "hash",   cat: "编码",   icon: "hash",  name: "哈希计算",     desc: "算文本的 SHA-1 / SHA-256 / SHA-512，核对文件指纹时用文本版顶一下。", kw: "hash sha md5 校验 指纹" },
+        { id: "uuid",   cat: "日常",   icon: "uuid",  name: "UUID 生成",    desc: "批量生成 UUID，配置里要填唯一 ID 时随手来几个。", kw: "uuid guid 唯一 id" },
+        { id: "count",  cat: "文本",   icon: "text",  name: "字数统计",     desc: "统计字数、行数、段落、中英文和数字占比，写稿排版前数一数。", kw: "字数 统计 字符 行数" },
+        { id: "lines",  cat: "文本",   icon: "lines", name: "文本行处理",   desc: "去重、去空行、排序、加行号、反转——整理名单和列表的流水线。", kw: "去重 排序 空行 行号 文本 列表" },
+        { id: "color",  cat: "日常",   icon: "color", name: "颜色值转换",   desc: "HEX、RGB、HSL 互转，顺带预览颜色，改主题配色时用。", kw: "颜色 hex rgb hsl 配色" }
+      ];
+      var CATS = ["全部", "影音源", "编码", "文本", "时间", "日常"];
+
+      /* ---------------- home grid ---------------- */
+      var grid = $("#grid"), chipsBox = $("#chips"), curCat = "全部";
+      CATS.forEach(function (c) {
+        var b = document.createElement("button");
+        b.className = "chip"; b.textContent = c;
+        b.setAttribute("aria-pressed", c === "全部" ? "true" : "false");
+        b.addEventListener("click", function () {
+          curCat = c;
+          Array.prototype.forEach.call(chipsBox.children, function (x) {
+            x.setAttribute("aria-pressed", x.textContent === c ? "true" : "false");
+          });
+          renderGrid();
+        });
+        chipsBox.appendChild(b);
+      });
+      TOOLS.forEach(function (t) {
+        var card = document.createElement("button");
+        card.className = "card"; card.dataset.id = t.id;
+        card.innerHTML = '<span class="ic">' + ICONS[t.icon] + "</span><h2>" + esc(t.name) +
+          "</h2><p>" + esc(t.desc) + '</p><span class="tag">' + esc(t.cat) + " →</span>";
+        card.addEventListener("click", function () { openTool(t.id); });
+        grid.appendChild(card);
+      });
+      function renderGrid() {
+        var q = $("#search").value.trim().toLowerCase();
+        var shown = 0;
+        Array.prototype.forEach.call(grid.children, function (card) {
+          var t = TOOLS.filter(function (x) { return x.id === card.dataset.id; })[0];
+          var okCat = curCat === "全部" || t.cat === curCat;
+          var okQ = !q || (t.name + " " + t.desc + " " + t.kw).toLowerCase().indexOf(q) >= 0;
+          card.classList.toggle("hidden", !(okCat && okQ));
+          if (okCat && okQ) shown++;
+        });
+        $("#grid-empty").classList.toggle("hidden", shown > 0);
+      }
+      $("#search").addEventListener("input", renderGrid);
+
+      /* ---------------- view switching ---------------- */
+      var builders = {};
+      function openTool(id) {
+        var t = TOOLS.filter(function (x) { return x.id === id; })[0];
+        $("#tool-title").textContent = t.name;
+        $("#tool-desc").textContent = t.desc;
+        var body = $("#tool-body");
+        body.innerHTML = "";
+        builders[id](body);
+        $("#view-home").classList.add("hidden");
+        $("#view-tool").classList.remove("hidden");
+        window.scrollTo(0, 0);
+      }
+      $("#btn-back").addEventListener("click", function () {
+        $("#view-tool").classList.add("hidden");
+        $("#view-home").classList.remove("hidden");
+        window.scrollTo(0, 0);
+      });
+      function panel(html) {
+        var d = document.createElement("div");
+        d.className = "panel"; d.innerHTML = html;
+        return d;
+      }
+      function outBox(p) {
+        var o = document.createElement("div");
+        o.className = "out mono"; o.setAttribute("aria-live", "polite");
+        p.appendChild(o); return o;
+      }
+      function copyBtn(getText, label) {
+        var b = document.createElement("button");
+        b.className = "btn"; b.textContent = "复制结果";
+        b.addEventListener("click", function () {
+          var v = getText();
+          if (!v) { toast("还没有结果可复制"); return; }
+          copyText(v, label || "结果");
+        });
+        return b;
+      }
+
+      /* ============ TOOL: 直播源整理 ============ */
+      builders.live = function (body) {
+        var p = panel(
+          '<label class="flabel" for="live-in">把 M3U 或 TXT 内容粘贴进来</label>' +
+          '<textarea id="live-in" class="mono" placeholder="#EXTM3U&#10;#EXTINF:-1 group-title=&quot;央视&quot;,CCTV-1&#10;http://example.com/cctv1.m3u8&#10;&#10;或者 TXT 格式：&#10;央视,#genre#&#10;CCTV-1,http://example.com/cctv1.m3u8"></textarea>' +
+          '<div class="btnrow">' +
+          '<button class="btn primary" id="live-analyze">分析统计</button>' +
+          '<button class="btn" id="live-to-txt">转成 TXT</button>' +
+          '<button class="btn" id="live-to-m3u">转成 M3U</button>' +
+          '<button class="btn" id="live-dedupe">按地址去重</button>' +
+          '</div>' +
+          '<div id="live-stats"></div>' +
+          '<div class="msg" id="live-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var btnRow = document.createElement("div");
+        btnRow.className = "btnrow";
+        btnRow.appendChild(copyBtn(function () { return out.textContent; }, "整理结果"));
+        var dl = document.createElement("button");
+        dl.className = "btn"; dl.textContent = "下载为文件";
+        dl.addEventListener("click", function () {
+          if (!out.textContent) { toast("还没有结果可下载"); return; }
+          var isM3u = out.textContent.indexOf("#EXTM3U") === 0;
+          download(isM3u ? "playlist.m3u" : "playlist.txt", out.textContent);
+        });
+        btnRow.appendChild(dl);
+        p.appendChild(btnRow);
+
+        function parse(text) {
+          var lines = text.split(/\r?\n/), items = [], i, m;
+          var isM3u = text.indexOf("#EXTINF") >= 0;
+          if (isM3u) {
+            var cur = null;
+            for (i = 0; i < lines.length; i++) {
+              var L = lines[i].trim();
+              if (L.indexOf("#EXTINF") === 0) {
+                var name = L.split(",").pop().trim();
+                var g = /group-title="([^"]*)"/.exec(L);
+                var logo = /tvg-logo="([^"]*)"/.exec(L);
+                var tid = /tvg-id="([^"]*)"/.exec(L);
+                cur = { name: name || "未命名", group: g ? g[1] : "未分组", logo: logo ? logo[1] : "", tvgid: tid ? tid[1] : "", url: "" };
+              } else if (L && L.charAt(0) !== "#" && cur) {
+                cur.url = L; items.push(cur); cur = null;
+              }
+            }
+          } else {
+            var group = "未分组";
+            for (i = 0; i < lines.length; i++) {
+              var t = lines[i].trim();
+              if (!t) continue;
+              if (/#genre#$/.test(t)) { group = t.replace(/,#genre#$/, "").trim(); continue; }
+              m = /^([^,]+),(\S+)$/.exec(t);
+              if (m && /^https?:\/\//i.test(m[2])) items.push({ name: m[1].trim(), group: group, logo: "", tvgid: "", url: m[2].trim() });
+            }
+          }
+          return items;
+        }
+        function stats(items) {
+          var groups = {}, dup = {}, dupN = 0;
+          items.forEach(function (it) {
+            groups[it.group] = (groups[it.group] || 0) + 1;
+            if (dup[it.url]) dupN++; else dup[it.url] = 1;
+          });
+          return { groups: groups, groupCount: Object.keys(groups).length, dup: dupN };
+        }
+        function renderStats(items) {
+          var s = stats(items);
+          var html = '<div class="stat-grid">' +
+            '<div class="stat"><b>' + items.length + '</b><span>频道总数</span></div>' +
+            '<div class="stat"><b>' + s.groupCount + '</b><span>分组数</span></div>' +
+            '<div class="stat"><b>' + s.dup + '</b><span>重复地址</span></div></div>';
+          var rows = Object.keys(s.groups).sort(function (a, b) { return s.groups[b] - s.groups[a]; })
+            .map(function (g) { return "<tr><td>" + esc(g) + "</td><td>" + s.groups[g] + " 个频道</td></tr>"; }).join("");
+          html += '<table class="mini"><tr><th>分组</th><th>数量</th></tr>' + rows + "</table>";
+          $("#live-stats").innerHTML = html;
+          return s;
+        }
+        function toTxt(items) {
+          var byGroup = {}, order = [];
+          items.forEach(function (it) {
+            if (!byGroup[it.group]) { byGroup[it.group] = []; order.push(it.group); }
+            byGroup[it.group].push(it);
+          });
+          return order.map(function (g) {
+            return g + ",#genre#\n" + byGroup[g].map(function (it) { return it.name + "," + it.url; }).join("\n");
+          }).join("\n\n") + "\n";
+        }
+        function toM3u(items) {
+          var s = "#EXTM3U\n";
+          items.forEach(function (it) {
+            s += '#EXTINF:-1' +
+              (it.tvgid ? ' tvg-id="' + it.tvgid + '"' : "") +
+              (it.logo ? ' tvg-logo="' + it.logo + '"' : "") +
+              ' group-title="' + it.group + '",' + it.name + "\n" + it.url + "\n";
+          });
+          return s;
+        }
+        function getItems() {
+          var v = $("#live-in").value.trim();
+          if (!v) { $("#live-msg").className = "msg err"; $("#live-msg").textContent = "先粘贴内容进来再点按钮。"; return null; }
+          var items = parse(v);
+          if (!items.length) { $("#live-msg").className = "msg err"; $("#live-msg").textContent = "没认出频道——确认是 M3U（含 #EXTINF）或「名称,地址」的 TXT 格式。"; return null; }
+          $("#live-msg").className = "msg ok"; $("#live-msg").textContent = "";
+          return items;
+        }
+        $("#live-analyze").addEventListener("click", function () {
+          var items = getItems(); if (!items) return;
+          renderStats(items);
+          out.textContent = "";
+          toast("分析完成：" + items.length + " 个频道");
+        });
+        $("#live-to-txt").addEventListener("click", function () {
+          var items = getItems(); if (!items) return;
+          renderStats(items); out.textContent = toTxt(items);
+        });
+        $("#live-to-m3u").addEventListener("click", function () {
+          var items = getItems(); if (!items) return;
+          renderStats(items); out.textContent = toM3u(items);
+        });
+        $("#live-dedupe").addEventListener("click", function () {
+          var items = getItems(); if (!items) return;
+          var seen = {}, kept = [];
+          items.forEach(function (it) { if (!seen[it.url]) { seen[it.url] = 1; kept.push(it); } });
+          renderStats(kept);
+          out.textContent = $("#live-in").value.indexOf("#EXTINF") >= 0 ? toM3u(kept) : toTxt(kept);
+          toast("去重完成，去掉 " + (items.length - kept.length) + " 条");
+        });
+      };
+
+      /* ============ TOOL: 时间戳转换 ============ */
+      builders.ts = function (body) {
+        var p = panel(
+          '<div class="row">' +
+          '<div><label class="flabel" for="ts-in">时间戳（秒或毫秒，自动识别）</label><input id="ts-in" class="mono" type="text" inputmode="numeric" placeholder="例如 1795198620" /></div>' +
+          '<div><label class="flabel" for="ts-date">日期时间</label><input id="ts-date" class="mono" type="text" placeholder="例如 2026-11-21 02:17:00" /></div>' +
+          '</div>' +
+          '<div class="btnrow"><button class="btn primary" id="ts-now">填入当前时间</button>' +
+          '<button class="btn" id="ts-swap">按输入互相转换 ↓</button></div>' +
+          '<div class="msg" id="ts-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        function showResult(ms) {
+          var d = new Date(ms);
+          out.textContent =
+            "日期时间（本地）：" + fmtDate(d) + "\n" +
+            "日期时间（UTC）： " + d.toUTCString() + "\n" +
+            "时间戳（秒）：    " + Math.floor(ms / 1000) + "\n" +
+            "时间戳（毫秒）：  " + ms + "\n" +
+            "星期：            星期" + WEEK[d.getDay()];
+        }
+        $("#ts-now").addEventListener("click", function () {
+          var now = Date.now();
+          $("#ts-in").value = Math.floor(now / 1000);
+          $("#ts-date").value = fmtDate(new Date(now));
+          showResult(now);
+        });
+        $("#ts-swap").addEventListener("click", function () {
+          var msg = $("#ts-msg"); msg.textContent = ""; msg.className = "msg";
+          var v = $("#ts-in").value.trim(), dv = $("#ts-date").value.trim();
+          if (v && /^\d+$/.test(v)) {
+            var n = Number(v);
+            showResult(v.length <= 10 ? n * 1000 : n);
+          } else if (dv) {
+            var d = new Date(dv.replace(/-/g, "/"));
+            if (isNaN(d.getTime())) { msg.className = "msg err"; msg.textContent = "日期格式没认出来，用 2026-11-21 02:17:00 这种格式。"; return; }
+            showResult(d.getTime());
+          } else {
+            msg.className = "msg err"; msg.textContent = "两个框至少填一个。";
+          }
+        });
+        showResult(Date.now());
+      };
+
+      /* ============ TOOL: JSON ============ */
+      builders.json = function (body) {
+        var p = panel(
+          '<label class="flabel" for="json-in">JSON 内容</label>' +
+          '<textarea id="json-in" class="mono" placeholder=\'{"name":"峰少","tools":[1,2,3]}\'></textarea>' +
+          '<div class="row" style="margin-top:10px"><div><label class="flabel" for="json-indent">缩进空格数</label>' +
+          '<select id="json-indent"><option value="2">2 空格</option><option value="4">4 空格</option><option value="0">Tab</option></select></div></div>' +
+          '<div class="btnrow"><button class="btn primary" id="json-fmt">格式化</button>' +
+          '<button class="btn" id="json-min">压缩成一行</button></div>' +
+          '<div class="msg" id="json-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "JSON"));
+        p.appendChild(br);
+        function run(min) {
+          var msg = $("#json-msg"), v = $("#json-in").value.trim();
+          if (!v) { msg.className = "msg err"; msg.textContent = "先粘贴 JSON 进来。"; return; }
+          try {
+            var obj = JSON.parse(v);
+            var ind = $("#json-indent").value;
+            out.textContent = min ? JSON.stringify(obj) : JSON.stringify(obj, null, ind === "0" ? "\t" : Number(ind));
+            msg.className = "msg ok"; msg.textContent = "✓ 合法 JSON" + (Array.isArray(obj) ? "（数组，" + obj.length + " 项）" : "（对象，" + Object.keys(obj).length + " 个键）");
+          } catch (e) {
+            msg.className = "msg err"; msg.textContent = "✗ " + e.message;
+            out.textContent = "";
+          }
+        }
+        $("#json-fmt").addEventListener("click", function () { run(false); });
+        $("#json-min").addEventListener("click", function () { run(true); });
+      };
+
+      /* ============ TOOL: Base64 ============ */
+      builders.base64 = function (body) {
+        var p = panel(
+          '<label class="flabel" for="b64-in">输入文本或 Base64</label>' +
+          '<textarea id="b64-in" placeholder="在这里输入…"></textarea>' +
+          '<div class="btnrow"><button class="btn primary" id="b64-enc">编码 →</button>' +
+          '<button class="btn" id="b64-dec">← 解码</button></div>' +
+          '<div class="msg" id="b64-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "结果"));
+        p.appendChild(br);
+        function enc(s) { return btoa(unescape(encodeURIComponent(s))); }
+        function dec(s) { return decodeURIComponent(escape(atob(s.replace(/\s/g, "")))); }
+        $("#b64-enc").addEventListener("click", function () {
+          var v = $("#b64-in").value;
+          if (!v) { toast("输入是空的"); return; }
+          out.textContent = enc(v); $("#b64-msg").textContent = "";
+        });
+        $("#b64-dec").addEventListener("click", function () {
+          var v = $("#b64-in").value.trim(), msg = $("#b64-msg");
+          if (!v) { toast("输入是空的"); return; }
+          try { out.textContent = dec(v); msg.className = "msg ok"; msg.textContent = "解码成功。"; }
+          catch (e) { msg.className = "msg err"; msg.textContent = "这不是合法的 Base64，或者解出来不是文本。"; out.textContent = ""; }
+        });
+      };
+
+      /* ============ TOOL: URL 编解码 ============ */
+      builders.url = function (body) {
+        var p = panel(
+          '<label class="flabel" for="url-in">输入链接或文本</label>' +
+          '<textarea id="url-in" class="mono" placeholder="https://example.com/搜索?q=峰少 工具箱"></textarea>' +
+          '<div class="btnrow"><button class="btn primary" id="url-enc">编码 →</button>' +
+          '<button class="btn" id="url-dec">← 解码</button></div>' +
+          '<div class="msg" id="url-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "结果"));
+        p.appendChild(br);
+        $("#url-enc").addEventListener("click", function () {
+          var v = $("#url-in").value;
+          if (!v) { toast("输入是空的"); return; }
+          out.textContent = encodeURIComponent(v); $("#url-msg").textContent = "";
+        });
+        $("#url-dec").addEventListener("click", function () {
+          var v = $("#url-in").value.trim(), msg = $("#url-msg");
+          if (!v) { toast("输入是空的"); return; }
+          try { out.textContent = decodeURIComponent(v); msg.className = "msg ok"; msg.textContent = "解码成功。"; }
+          catch (e) { msg.className = "msg err"; msg.textContent = "解码失败，里面有不合法的 % 转义。"; out.textContent = ""; }
+        });
+      };
+
+      /* ============ TOOL: 二维码 ============ */
+      builders.qr = function (body) {
+        var p = panel(
+          '<label class="flabel" for="qr-in">链接或文字</label>' +
+          '<textarea id="qr-in" style="min-height:76px" placeholder="https://…">https://github.com/shaoyesan7/my-epg</textarea>' +
+          '<div class="btnrow"><button class="btn primary" id="qr-gen">生成二维码</button>' +
+          '<button class="btn" id="qr-dl">下载图片</button></div>' +
+          '<div class="msg" id="qr-msg"></div>' +
+          '<div class="qrbox"><canvas id="qr-canvas" width="260" height="260"></canvas></div>'
+        );
+        body.appendChild(p);
+        function gen() {
+          var msg = $("#qr-msg"), v = $("#qr-in").value.trim();
+          if (!v) { msg.className = "msg err"; msg.textContent = "先输入内容。"; return; }
+          if (typeof QRCode === "undefined") { msg.className = "msg err"; msg.textContent = "二维码组件没加载成功，检查一下网络再刷新。"; return; }
+          QRCode.toCanvas($("#qr-canvas"), v, { width: 260, margin: 1 }, function (err) {
+            msg.className = err ? "msg err" : "msg ok";
+            msg.textContent = err ? "内容太长了，生成失败。" : "生成好了，手机扫一扫。";
+          });
+        }
+        $("#qr-gen").addEventListener("click", gen);
+        $("#qr-dl").addEventListener("click", function () {
+          var c = $("#qr-canvas");
+          var a = document.createElement("a");
+          a.href = c.toDataURL("image/png"); a.download = "qrcode.png"; a.click();
+        });
+        gen();
+      };
+
+      /* ============ TOOL: 密码生成 ============ */
+      builders.pwd = function (body) {
+        var p = panel(
+          '<label class="flabel" for="pwd-len">长度：<b id="pwd-len-v">16</b> 位</label>' +
+          '<input type="range" id="pwd-len" min="6" max="64" value="16" />' +
+          '<div class="checks">' +
+          '<label><input type="checkbox" id="pwd-lower" checked /> 小写字母</label>' +
+          '<label><input type="checkbox" id="pwd-upper" checked /> 大写字母</label>' +
+          '<label><input type="checkbox" id="pwd-digit" checked /> 数字</label>' +
+          '<label><input type="checkbox" id="pwd-sym" /> 符号 !@#$%</label>' +
+          '<label><input type="checkbox" id="pwd-noamb" /> 排除易混字符 (0O1lI)</label>' +
+          '</div>' +
+          '<div class="row" style="margin-top:8px"><div><label class="flabel" for="pwd-num">生成个数</label>' +
+          '<select id="pwd-num"><option>1</option><option selected>5</option><option>10</option><option>20</option></select></div></div>' +
+          '<div class="btnrow"><button class="btn primary" id="pwd-gen">生成密码</button></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "密码"));
+        p.appendChild(br);
+        $("#pwd-len").addEventListener("input", function () { $("#pwd-len-v").textContent = this.value; });
+        function gen() {
+          var sets = "";
+          if ($("#pwd-lower").checked) sets += "abcdefghijkmnopqrstuvwxyz";
+          if ($("#pwd-upper").checked) sets += "ABCDEFGHJKLMNPQRSTUVWXYZ";
+          if ($("#pwd-digit").checked) sets += "23456789";
+          if (!$("#pwd-noamb").checked) {
+            if ($("#pwd-lower").checked) sets += "l";
+            if ($("#pwd-upper").checked) sets += "IO";
+            if ($("#pwd-digit").checked) sets += "01";
+          }
+          if ($("#pwd-sym").checked) sets += "!@#$%^&*()-_=+[]{}?";
+          if (!sets) { toast("至少勾选一种字符"); return; }
+          var len = Number($("#pwd-len").value), num = Number($("#pwd-num").value), res = [];
+          var buf = new Uint32Array(len);
+          for (var k = 0; k < num; k++) {
+            crypto.getRandomValues(buf);
+            var s = "";
+            for (var i = 0; i < len; i++) s += sets[buf[i] % sets.length];
+            res.push(s);
+          }
+          out.textContent = res.join("\n");
+        }
+        $("#pwd-gen").addEventListener("click", gen);
+        gen();
+      };
+
+      /* ============ TOOL: 哈希 ============ */
+      builders.hash = function (body) {
+        var p = panel(
+          '<label class="flabel" for="hash-in">输入文本</label>' +
+          '<textarea id="hash-in" placeholder="在这里输入要计算哈希的文本…"></textarea>' +
+          '<div class="btnrow"><button class="btn primary" id="hash-go">计算哈希</button></div>' +
+          '<div class="msg" id="hash-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        function hex(buf) {
+          return Array.prototype.map.call(new Uint8Array(buf), function (b) { return pad(b.toString(16)); }).join("");
+        }
+        $("#hash-go").addEventListener("click", function () {
+          var v = $("#hash-in").value, msg = $("#hash-msg");
+          if (!v) { toast("输入是空的"); return; }
+          if (!crypto.subtle) { msg.className = "msg err"; msg.textContent = "当前环境不支持哈希计算。"; return; }
+          var data = new TextEncoder().encode(v);
+          Promise.all(["SHA-1", "SHA-256", "SHA-512"].map(function (a) { return crypto.subtle.digest(a, data); }))
+            .then(function (r) {
+              out.textContent = "SHA-1:   " + hex(r[0]) + "\nSHA-256: " + hex(r[1]) + "\nSHA-512: " + hex(r[2]);
+              msg.className = "msg ok"; msg.textContent = "算好了（这是文本的哈希，不是文件的）。";
+            });
+        });
+      };
+
+      /* ============ TOOL: UUID ============ */
+      builders.uuid = function (body) {
+        var p = panel(
+          '<div class="row"><div><label class="flabel" for="uuid-num">生成个数</label>' +
+          '<select id="uuid-num"><option>1</option><option selected>5</option><option>10</option><option>30</option><option>50</option></select></div>' +
+          '<div><label class="flabel" for="uuid-case">大小写</label>' +
+          '<select id="uuid-case"><option value="lower">小写</option><option value="upper">大写</option></select></div></div>' +
+          '<div class="checks"><label><input type="checkbox" id="uuid-hyphen" checked /> 带连字符</label></div>' +
+          '<div class="btnrow"><button class="btn primary" id="uuid-gen">生成 UUID</button></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "UUID"));
+        p.appendChild(br);
+        function one() {
+          if (crypto.randomUUID) return crypto.randomUUID();
+          var b = new Uint8Array(16); crypto.getRandomValues(b);
+          b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+          var h = Array.prototype.map.call(b, function (x) { return pad(x.toString(16)); }).join("");
+          return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+        }
+        function gen() {
+          var n = Number($("#uuid-num").value), up = $("#uuid-case").value === "upper", hy = $("#uuid-hyphen").checked, r = [];
+          for (var i = 0; i < n; i++) {
+            var u = one();
+            if (!hy) u = u.replace(/-/g, "");
+            r.push(up ? u.toUpperCase() : u);
+          }
+          out.textContent = r.join("\n");
+        }
+        $("#uuid-gen").addEventListener("click", gen);
+        gen();
+      };
+
+      /* ============ TOOL: 字数统计 ============ */
+      builders.count = function (body) {
+        var p = panel(
+          '<label class="flabel" for="cnt-in">输入或粘贴文本，边打边统计</label>' +
+          '<textarea id="cnt-in" style="min-height:170px" placeholder="在这里输入…"></textarea>' +
+          '<div class="stat-grid" id="cnt-stats"></div>'
+        );
+        body.appendChild(p);
+        function stat(label, v) { return '<div class="stat"><b>' + v + '</b><span>' + label + "</span></div>"; }
+        function run() {
+          var v = $("#cnt-in").value;
+          var cjk = (v.match(/[\u3400-\u9fff\uf900-\ufaff]/g) || []).length;
+          var en = (v.match(/[a-zA-Z]+/g) || []).length;
+          var digits = (v.match(/\d/g) || []).length;
+          var lines = v ? v.split(/\r?\n/).length : 0;
+          var paras = v ? v.split(/\n\s*\n/).filter(function (s) { return s.trim(); }).length : 0;
+          var noSpace = v.replace(/\s/g, "").length;
+          $("#cnt-stats").innerHTML =
+            stat("总字符", v.length) + stat("不含空格", noSpace) +
+            stat("汉字", cjk) + stat("英文单词", en) +
+            stat("数字", digits) + stat("行数", lines) + stat("段落", paras);
+        }
+        $("#cnt-in").addEventListener("input", run);
+        run();
+      };
+
+      /* ============ TOOL: 文本行处理 ============ */
+      builders.lines = function (body) {
+        var p = panel(
+          '<label class="flabel" for="ln-in">一行一条，粘贴进来</label>' +
+          '<textarea id="ln-in" class="mono" placeholder="苹果&#10;香蕉&#10;苹果&#10;&#10;橙子"></textarea>' +
+          '<div class="btnrow">' +
+          '<button class="btn primary" data-op="dedupe">去重</button>' +
+          '<button class="btn" data-op="noempty">去空行</button>' +
+          '<button class="btn" data-op="sort">排序 ↑</button>' +
+          '<button class="btn" data-op="sortdesc">排序 ↓</button>' +
+          '<button class="btn" data-op="trim">去首尾空格</button>' +
+          '<button class="btn" data-op="number">加行号</button>' +
+          '<button class="btn" data-op="reverse">反转顺序</button>' +
+          '</div>' +
+          '<div class="msg" id="ln-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "处理结果"));
+        var back = document.createElement("button");
+        back.className = "btn"; back.textContent = "结果填回输入框";
+        back.addEventListener("click", function () {
+          if (!out.textContent) { toast("还没有结果"); return; }
+          $("#ln-in").value = out.textContent; toast("已填回，可以继续处理");
+        });
+        br.appendChild(back);
+        p.appendChild(br);
+        Array.prototype.forEach.call(p.querySelectorAll("[data-op]"), function (btn) {
+          btn.addEventListener("click", function () {
+            var v = $("#ln-in").value, msg = $("#ln-msg");
+            if (!v) { msg.className = "msg err"; msg.textContent = "先粘贴内容进来。"; return; }
+            var arr = v.split(/\r?\n/), op = btn.dataset.op, before = arr.length;
+            if (op === "dedupe") { var seen = {}; arr = arr.filter(function (l) { var k = l; if (seen[k]) return false; seen[k] = 1; return true; }); }
+            if (op === "noempty") arr = arr.filter(function (l) { return l.trim() !== ""; });
+            if (op === "sort") arr = arr.slice().sort();
+            if (op === "sortdesc") arr = arr.slice().sort().reverse();
+            if (op === "trim") arr = arr.map(function (l) { return l.trim(); });
+            if (op === "number") arr = arr.map(function (l, i) { return (i + 1) + ". " + l; });
+            if (op === "reverse") arr = arr.slice().reverse();
+            out.textContent = arr.join("\n");
+            msg.className = "msg ok";
+            msg.textContent = "处理完成：" + before + " 行 → " + arr.length + " 行。";
+          });
+        });
+      };
+
+      /* ============ TOOL: 颜色转换 ============ */
+      builders.color = function (body) {
+        var p = panel(
+          '<div class="row">' +
+          '<div><label class="flabel" for="col-hex">HEX</label><input id="col-hex" class="mono" type="text" value="#c2410c" /></div>' +
+          '<div><label class="flabel" for="col-pick">取色器</label><input id="col-pick" type="color" value="#c2410c" style="height:44px;padding:4px" /></div>' +
+          '</div>' +
+          '<div class="swatch" id="col-swatch"></div>' +
+          '<div class="msg" id="col-msg"></div>'
+        );
+        body.appendChild(p);
+        var out = outBox(p);
+        var br = document.createElement("div"); br.className = "btnrow";
+        br.appendChild(copyBtn(function () { return out.textContent; }, "颜色值"));
+        p.appendChild(br);
+        function render(hex) {
+          var m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+          var msg = $("#col-msg");
+          if (!m) { msg.className = "msg err"; msg.textContent = "HEX 格式不对，用 #RRGGBB 六位。"; return; }
+          msg.textContent = "";
+          var h = m[1].toLowerCase();
+          var r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+          var mx = Math.max(r, g, b) / 255, mn = Math.min(r, g, b) / 255, l = (mx + mn) / 2, hue = 0, sat = 0;
+          if (mx !== mn) {
+            var d = mx - mn;
+            sat = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+            var rn = r / 255, gn = g / 255, bn = b / 255;
+            if (mx === rn) hue = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60;
+            else if (mx === gn) hue = ((bn - rn) / d + 2) * 60;
+            else hue = ((rn - gn) / d + 4) * 60;
+          }
+          $("#col-swatch").style.background = "#" + h;
+          $("#col-pick").value = "#" + h;
+          out.textContent =
+            "HEX: #" + h.toUpperCase() + "\n" +
+            "RGB: rgb(" + r + ", " + g + ", " + b + ")\n" +
+            "HSL: hsl(" + Math.round(hue) + ", " + Math.round(sat * 100) + "%, " + Math.round(l * 100) + "%)";
+        }
+        $("#col-hex").addEventListener("input", function () { render(this.value); });
+        $("#col-pick").addEventListener("input", function () { $("#col-hex").value = this.value; render(this.value); });
+        render("#c2410c");
+      };
+
+    })();
+    </script>
+  </body>
+</html>
