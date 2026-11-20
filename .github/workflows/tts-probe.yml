@@ -1,0 +1,41 @@
+name: tts-probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Probe edge-tts with Taiwan voice
+        run: |
+          set +e
+          pip install -q edge-tts
+          python3 - <<'PYEOF' > probe_tts_result.txt 2>&1
+          import asyncio, os
+          import edge_tts
+
+          async def main():
+              voices = await edge_tts.list_voices()
+              tw = [v["ShortName"] for v in voices if v["Locale"] == "zh-TW"]
+              print("zh-TW voices:", tw)
+              out = "probe_tw.mp3"
+              comm = edge_tts.Communicate("峰少，我是小妞，台湾的声音来了喔。", "zh-TW-HsiaoChenNeural")
+              await comm.save(out)
+              print("saved bytes:", os.path.getsize(out))
+
+          asyncio.run(main())
+          print("PROBE_OK")
+          PYEOF
+          cat probe_tts_result.txt
+      - name: Commit result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add probe_tts_result.txt
+          git commit -m "tts probe result" || echo "nothing to commit"
+          git push || echo "push failed"
