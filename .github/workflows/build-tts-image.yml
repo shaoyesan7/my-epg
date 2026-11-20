@@ -1,0 +1,24 @@
+name: build-tts-image
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "tts-server/**"
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: tts-server
+          push: true
+          tags: ghcr.io/shaoyesan7/xiaoniu-tts:latest
