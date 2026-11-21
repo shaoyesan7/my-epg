@@ -74,12 +74,12 @@
 'use strict';
 var log = document.getElementById('log'), statusEl = document.getElementById('status'),
     textEl = document.getElementById('text'), micBtn = document.getElementById('mic');
-var history = [], audio = new Audio();
+var chatHistory = [], audio = new Audio();
 
 function key() { return localStorage.getItem('vb_key') || ''; }
 function askKey(msg) {
-  var k = prompt(msg || '输入访问口令') ;
-  if (k !== null) localStorage.setItem('vb_key', k.trim());
+  var k = prompt(msg || '输入访问口令');
+  if (k) localStorage.setItem('vb_key', String(k).trim());
 }
 document.getElementById('keyBtn').onclick = function () { askKey('输入新的访问口令'); setStatus('口令已更新'); };
 function headers() { return { 'Content-Type': 'application/json', 'x-bot-key': key() }; }
@@ -105,14 +105,14 @@ async function speak(text) {
 
 async function send(text) {
   text = (text || '').trim(); if (!text) return;
-  addMsg(text, 'me'); history.push({ role: 'user', content: text });
+  addMsg(text, 'me'); chatHistory.push({ role: 'user', content: text });
   textEl.value = ''; setStatus('想一想…');
   try {
-    var r = await fetch('/api/chat', { method: 'POST', headers: headers(), body: JSON.stringify({ messages: history }) });
+    var r = await fetch('/api/chat', { method: 'POST', headers: headers(), body: JSON.stringify({ messages: chatHistory }) });
     var data = await r.json().catch(function () { return {}; });
     if (r.status === 401) { askKey('口令不对,重新输入访问口令'); setStatus('口令不对,填好后再发一次'); return; }
     if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
-    history.push({ role: 'assistant', content: data.text });
+    chatHistory.push({ role: 'assistant', content: data.text });
     var bubble = addMsg(data.text, 'bot');
     bubble.onclick = function () { speak(data.text); };
     setStatus('朗读中…'); await speak(data.text); setStatus('');
