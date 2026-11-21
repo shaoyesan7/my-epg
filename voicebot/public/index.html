@@ -13,7 +13,9 @@
   header { padding: 14px 16px 6px; display: flex; align-items: baseline; gap: 8px; }
   header h1 { font-size: 19px; margin: 0; }
   header span { font-size: 12px; opacity: .65; }
-  header button { margin-left: auto; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #9996; background: transparent; }
+  header button { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #9996; background: transparent; }
+  header .sp { margin-left: auto; display: flex; gap: 6px; }
+  header button.on { background: #f472b6; color: #fff; border-color: transparent; }
   #log { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 10px; }
   .msg { max-width: 82%; padding: 9px 13px; border-radius: 16px; line-height: 1.55; font-size: 16px; white-space: pre-wrap; word-break: break-word; }
   .me { align-self: flex-end; background: #f472b6; color: #fff; border-bottom-right-radius: 4px; }
@@ -28,16 +30,42 @@
   #mic { width: 52px; height: 52px; border-radius: 50%; font-size: 22px; padding: 0; background: #f472b6; }
   #mic.rec { background: #ef4444; animation: pulse 1s infinite; }
   @keyframes pulse { 50% { transform: scale(1.08); } }
+  /* 朗读模式 */
+  #reader { flex: 1; overflow-y: auto; padding: 10px 14px; display: none; flex-direction: column; gap: 10px; }
+  #readText { width: 100%; min-height: 110px; font-size: 15px; line-height: 1.5; padding: 10px 12px; border-radius: 12px;
+              border: 1px solid #9995; outline: none; background: #fff9; resize: vertical; }
+  @media (prefers-color-scheme: dark) { #readText { background: #232b38; color: #eee; } }
+  #reader .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  #reader .row .btn:disabled { opacity: .45; }
+  #readProg { font-size: 13px; opacity: .75; }
+  #readView { font-size: 17px; line-height: 1.9; padding: 12px 14px; border-radius: 12px; background: #ffffffa0; }
+  @media (prefers-color-scheme: dark) { #readView { background: #2b3342; color: #e8ecf3; } }
+  #readView .cur { background: #fde68a; color: #222; border-radius: 4px; padding: 0 2px; }
+  #readView .done { opacity: .45; }
 </style>
 </head>
 <body>
 <header>
   <h1>语音机器人</h1><span>甜美女声 · 晓晓</span>
-  <button id="keyBtn" type="button">换口令</button>
+  <div class="sp">
+    <button id="modeChat" class="on" type="button">聊天</button>
+    <button id="modeRead" type="button">朗读</button>
+    <button id="keyBtn" type="button">换口令</button>
+  </div>
 </header>
 <div id="log"></div>
+<div id="reader">
+  <textarea id="readText" placeholder="把要读的文字粘贴到这里(文章、小说章节都行),点开始朗读,她会一句一句连续读下去。"></textarea>
+  <div class="row">
+    <button id="readStart" class="btn" type="button">开始朗读</button>
+    <button id="readPause" class="btn" type="button" disabled>暂停</button>
+    <button id="readStop" class="btn" type="button" disabled>停止</button>
+    <span id="readProg"></span>
+  </div>
+  <div id="readView" style="display:none"></div>
+</div>
 <div id="status"></div>
-<footer>
+<footer id="chatbar">
   <button id="mic" class="btn" type="button" title="点一下说话">🎤</button>
   <input id="text" type="text" placeholder="也可以打字问我…" autocomplete="off">
   <button id="send" class="btn" type="button">发送</button>
@@ -117,8 +145,106 @@ if (SR) {
   micBtn.onclick = function () { setStatus('这个浏览器不支持语音输入,打字也行'); };
 }
 
+/* ---------- 模式切换 ---------- */
+var readerEl = document.getElementById('reader'), chatbar = document.getElementById('chatbar'),
+    modeChat = document.getElementById('modeChat'), modeRead = document.getElementById('modeRead');
+function setMode(read) {
+  modeRead.classList.toggle('on', read); modeChat.classList.toggle('on', !read);
+  readerEl.style.display = read ? 'flex' : 'none';
+  log.style.display = read ? 'none' : 'flex';
+  chatbar.style.display = read ? 'none' : 'flex';
+  if (!read) stopReading();
+}
+modeChat.onclick = function () { setMode(false); };
+modeRead.onclick = function () { setMode(true); };
+
+/* ---------- 朗读模式 ---------- */
+var readAudio = new Audio(), rChunks = [], rIdx = 0, rPlaying = false, rStop = true, rCache = {};
+var readTextEl = document.getElementById('readText'), readView = document.getElementById('readView'),
+    readProg = document.getElementById('readProg'),
+    btnStart = document.getElementById('readStart'), btnPause = document.getElementById('readPause'),
+    btnStop = document.getElementById('readStop');
+
+function splitChunks(text) {
+  var flat = text.replace(/\r\n/g, '\n').replace(/[ \t]+/g, ' ');
+  var parts = flat.match(/[^。!?!?;;……\n]+[。!?!?;;……]*/g) || [flat];
+  var chunks = [], cur = '';
+  parts.forEach(function (p) {
+    p = p.trim(); if (!p) return;
+    while (p.length > 150) { if (cur) { chunks.push(cur); cur = ''; } chunks.push(p.slice(0, 150)); p = p.slice(150); }
+    if ((cur + p).length > 150) { chunks.push(cur); cur = p; } else { cur += p; }
+  });
+  if (cur) chunks.push(cur);
+  return chunks.filter(function (c) { return c.trim(); });
+}
+
+function renderReadView() {
+  readView.style.display = 'block';
+  readView.innerHTML = '';
+  rChunks.forEach(function (c, i) {
+    var s = document.createElement('span');
+    s.textContent = c; s.id = 'rch' + i;
+    if (i < rIdx) s.className = 'done';
+    if (i === rIdx && !rStop) s.className = 'cur';
+    readView.appendChild(s);
+  });
+  var cur = document.getElementById('rch' + rIdx);
+  if (cur) cur.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  readProg.textContent = rChunks.length ? ('第 ' + Math.min(rIdx + 1, rChunks.length) + ' / ' + rChunks.length + ' 段') : '';
+}
+
+async function fetchChunk(i) {
+  if (rCache[i]) return rCache[i];
+  var r = await fetch('/api/tts?text=' + encodeURIComponent(rChunks[i]), { headers: headers() });
+  if (r.status === 401) { askKey('口令不对,重新输入访问口令'); throw new Error('口令不对'); }
+  if (!r.ok) throw new Error('tts ' + r.status);
+  var blob = await r.blob();
+  rCache[i] = URL.createObjectURL(blob);
+  return rCache[i];
+}
+
+async function playFrom(i) {
+  rIdx = i; renderReadView();
+  if (rStop) return;
+  if (i >= rChunks.length) { stopReading(); setStatus('读完啦'); return; }
+  try {
+    readAudio.src = await fetchChunk(i);
+    if (rStop) return;
+    fetchChunk(i + 1).catch(function () {});
+    await readAudio.play();
+    rPlaying = true; btnPause.textContent = '暂停';
+  } catch (e) {
+    setStatus('这一段没读出来:' + e.message + ',跳到下一段');
+    if (!rStop) playFrom(i + 1);
+  }
+}
+readAudio.onended = function () { if (!rStop) playFrom(rIdx + 1); };
+
+function stopReading() {
+  rStop = true; rPlaying = false;
+  try { readAudio.pause(); } catch (e) {}
+  btnStart.disabled = false; btnPause.disabled = true; btnStop.disabled = true;
+  btnPause.textContent = '暂停';
+  renderReadView();
+}
+
+btnStart.onclick = function () {
+  var chunks = splitChunks(readTextEl.value || '');
+  if (!chunks.length) { setStatus('先粘贴点文字进来呀'); return; }
+  rChunks = chunks; rCache = {}; rStop = false;
+  btnStart.disabled = true; btnPause.disabled = false; btnStop.disabled = false;
+  setStatus('开始朗读…');
+  playFrom(0);
+};
+btnPause.onclick = function () {
+  if (rStop) return;
+  if (rPlaying) { readAudio.pause(); rPlaying = false; btnPause.textContent = '继续'; }
+  else { readAudio.play(); rPlaying = true; btnPause.textContent = '暂停'; }
+};
+btnStop.onclick = function () { stopReading(); setStatus('已停止'); };
+
 if (!key()) askKey('第一次用,先输入访问口令');
-addMsg('你好呀,我是你的语音助手。点麦克风跟我说话,或者打字也行。点我的话还能重播哦。', 'bot');
+addMsg('你好呀,我是你的语音助手。点麦克风跟我说话,或者打字也行。点我的话还能重播哦。想让我读书给你听,就点上面的「朗读」。', 'bot');
 </script>
 </body>
 </html>
