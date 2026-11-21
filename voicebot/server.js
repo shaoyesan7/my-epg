@@ -9,14 +9,15 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
-
 const PORT = process.env.PORT || 3000;
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const AGNES_API_KEY = process.env.AGNES_API_KEY || '';
 const AGNES_BASE = (process.env.AGNES_BASE_URL || 'https://apihub.agnes-ai.com/v1').replace(/\/+$/, '');
 const AGNES_MODEL = process.env.AGNES_MODEL || 'agnes-3.0-flash';
-const TTS_VOICE = process.env.TTS_VOICE || 'zh-CN-XiaoxiaoNeural';
+/* 嗓子走自家 TTS 服务(晓晓, Python edge-tts 已验证可用):
+ * 微软改了 Edge TTS 鉴权后, Node 的 msedge-tts 老库握手被拒, 故改走代理。 */
+const TTS_API_BASE = (process.env.TTS_API_BASE || '').replace(/\/+$/, '');
+const TTS_SERVICE_TOKEN = process.env.TTS_SERVICE_TOKEN || '';
 
 const SYSTEM_PROMPT =
   '你是一个声音甜美、性格活泼的中文女生,正在和对方语音聊天,要像豆包语音聊天那样自然亲切、像真人一样。' +
@@ -94,22 +95,15 @@ async function handleChat(req, res) {
 async function handleTts(req, res, url) {
   const text = (url.searchParams.get('text') || '').trim().slice(0, 300);
   if (!text) return sendJson(res, 400, { error: '没有要朗读的文字' });
-  const tts = new MsEdgeTTS();
-  let timer = setTimeout(() => { try { tts.close(); } catch {} }, 25000);
+  if (!TTS_API_BASE || !TTS_SERVICE_TOKEN) return sendJson(res, 500, { error: '服务器还没配置语音服务' });
   try {
-    await tts.setMetadata(TTS_VOICE, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-    const audio = tts.toStream(text);
+    const r = await fetch(TTS_API_BASE + '/tts?text=' + encodeURIComponent(text) + '&k=' + encodeURIComponent(TTS_SERVICE_TOKEN));
+    if (!r.ok) return sendJson(res, 502, { error: '语音服务返回 ' + r.status });
+    const buf = Buffer.from(await r.arrayBuffer());
     res.writeHead(200, { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'no-store' });
-    audio.on('data', (c) => res.write(c));
-    audio.on('end', () => { clearTimeout(timer); try { tts.close(); } catch {} res.end(); });
-    audio.on('error', (e) => {
-      clearTimeout(timer); try { tts.close(); } catch {}
-      if (!res.headersSent) sendJson(res, 502, { error: '合成语音失败: ' + errText(e) });
-      else res.end();
-    });
+    return res.end(buf);
   } catch (e) {
-    clearTimeout(timer); try { tts.close(); } catch {}
-    return sendJson(res, 502, { error: '合成语音失败: ' + errText(e) });
+    return sendJson(res, 502, { error: '连不上语音服务: ' + errText(e) });
   }
 }
 
@@ -140,5 +134,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('voicebot listening on ' + PORT + ' voice=' + TTS_VOICE + ' model=' + AGNES_MODEL + (BOT_TOKEN ? ' gate=on' : ' gate=OFF (set BOT_TOKEN before deploying)'));
+  console.log('voicebot listening on ' + PORT + ' tts=' + (TTS_API_BASE ? 'proxy' : 'UNCONFIGURED') + ' model=' + AGNES_MODEL + (BOT_TOKEN ? ' gate=on' : ' gate=OFF (set BOT_TOKEN before deploying)'));
 });
