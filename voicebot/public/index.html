@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>语音机器人 · 甜美女声</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+         background: linear-gradient(160deg, #fdf2f8, #e0f2fe); min-height: 100dvh; display: flex; flex-direction: column; }
+  @media (prefers-color-scheme: dark) { body { background: linear-gradient(160deg, #1f2430, #14202e); } }
+  header { padding: 14px 16px 6px; display: flex; align-items: baseline; gap: 8px; }
+  header h1 { font-size: 19px; margin: 0; }
+  header span { font-size: 12px; opacity: .65; }
+  header button { margin-left: auto; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #9996; background: transparent; }
+  #log { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 82%; padding: 9px 13px; border-radius: 16px; line-height: 1.55; font-size: 16px; white-space: pre-wrap; word-break: break-word; }
+  .me { align-self: flex-end; background: #f472b6; color: #fff; border-bottom-right-radius: 4px; }
+  .bot { align-self: flex-start; background: #ffffffcc; color: #222; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px #0001; }
+  @media (prefers-color-scheme: dark) { .bot { background: #2b3342; color: #e8ecf3; } }
+  .bot:active { filter: brightness(.96); }
+  #status { min-height: 20px; text-align: center; font-size: 13px; opacity: .75; padding: 2px 12px; }
+  footer { padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; align-items: center; }
+  #text { flex: 1; font-size: 16px; padding: 11px 14px; border-radius: 999px; border: 1px solid #9995; outline: none; background: #fff9; }
+  @media (prefers-color-scheme: dark) { #text { background: #232b38; color: #eee; } }
+  .btn { border: none; border-radius: 999px; padding: 11px 16px; font-size: 15px; background: #38bdf8; color: #fff; }
+  #mic { width: 52px; height: 52px; border-radius: 50%; font-size: 22px; padding: 0; background: #f472b6; }
+  #mic.rec { background: #ef4444; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.08); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>语音机器人</h1><span>甜美女声 · 晓晓</span>
+  <button id="keyBtn" type="button">换口令</button>
+</header>
+<div id="log"></div>
+<div id="status"></div>
+<footer>
+  <button id="mic" class="btn" type="button" title="点一下说话">🎤</button>
+  <input id="text" type="text" placeholder="也可以打字问我…" autocomplete="off">
+  <button id="send" class="btn" type="button">发送</button>
+</footer>
+<script>
+'use strict';
+var log = document.getElementById('log'), statusEl = document.getElementById('status'),
+    textEl = document.getElementById('text'), micBtn = document.getElementById('mic');
+var history = [], audio = new Audio();
+
+function key() { return localStorage.getItem('vb_key') || ''; }
+function askKey(msg) {
+  var k = prompt(msg || '输入访问口令') ;
+  if (k !== null) localStorage.setItem('vb_key', k.trim());
+}
+document.getElementById('keyBtn').onclick = function () { askKey('输入新的访问口令'); setStatus('口令已更新'); };
+function headers() { return { 'Content-Type': 'application/json', 'x-bot-key': key() }; }
+function setStatus(s) { statusEl.textContent = s || ''; }
+
+function addMsg(text, who) {
+  var d = document.createElement('div');
+  d.className = 'msg ' + who; d.textContent = text;
+  if (who === 'bot') d.title = '点一下重播';
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+async function speak(text) {
+  try {
+    var r = await fetch('/api/tts?text=' + encodeURIComponent(text.slice(0, 300)), { headers: headers() });
+    if (!r.ok) throw new Error('tts ' + r.status);
+    var blob = await r.blob();
+    audio.src = URL.createObjectURL(blob);
+    await audio.play();
+  } catch (e) { /* 读不出来不打断聊天 */ }
+}
+
+async function send(text) {
+  text = (text || '').trim(); if (!text) return;
+  addMsg(text, 'me'); history.push({ role: 'user', content: text });
+  textEl.value = ''; setStatus('想一想…');
+  try {
+    var r = await fetch('/api/chat', { method: 'POST', headers: headers(), body: JSON.stringify({ messages: history }) });
+    var data = await r.json().catch(function () { return {}; });
+    if (r.status === 401) { askKey('口令不对,重新输入访问口令'); setStatus('口令不对,填好后再发一次'); return; }
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    history.push({ role: 'assistant', content: data.text });
+    var bubble = addMsg(data.text, 'bot');
+    bubble.onclick = function () { speak(data.text); };
+    setStatus('朗读中…'); await speak(data.text); setStatus('');
+  } catch (e) { setStatus('出错了:' + e.message); }
+}
+
+document.getElementById('send').onclick = function () { send(textEl.value); };
+textEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') send(textEl.value); });
+
+var rec = null, recording = false;
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  rec = new SR(); rec.lang = 'zh-CN'; rec.interimResults = true;
+  rec.onresult = function (ev) {
+    var s = '', fin = '';
+    for (var i = ev.resultIndex; i < ev.results.length; i++) {
+      if (ev.results[i].isFinal) fin += ev.results[i][0].transcript; else s += ev.results[i][0].transcript;
+    }
+    if (s) textEl.value = s;
+    if (fin) { textEl.value = ''; send(fin); }
+  };
+  rec.onend = function () { recording = false; micBtn.classList.remove('rec'); if (!statusEl.textContent) setStatus(''); };
+  rec.onerror = function (ev) { recording = false; micBtn.classList.remove('rec'); setStatus('听不清:' + ev.error); };
+  micBtn.onclick = function () {
+    if (recording) { rec.stop(); return; }
+    try { rec.start(); recording = true; micBtn.classList.add('rec'); setStatus('在听,说吧…'); }
+    catch (e) { setStatus('麦克风起不来:' + e.message); }
+  };
+} else {
+  micBtn.onclick = function () { setStatus('这个浏览器不支持语音输入,打字也行'); };
+}
+
+if (!key()) askKey('第一次用,先输入访问口令');
+addMsg('你好呀,我是你的语音助手。点麦克风跟我说话,或者打字也行。点我的话还能重播哦。', 'bot');
+</script>
+</body>
+</html>
