@@ -368,6 +368,7 @@ rules:
 - DOMAIN-SUFFIX,huggingface.co,🤖 AI服务
 - DOMAIN-SUFFIX,meta.ai,🤖 AI服务
 - DOMAIN-SUFFIX,metaaivm.com,🤖 AI服务
+- DOMAIN-SUFFIX,groq.com,🤖 AI服务
 - RULE-SET,Google,🔍 Google
 - GEOSITE,google,🔍 Google
 - RULE-SET,GitHub,🐙 GitHub
