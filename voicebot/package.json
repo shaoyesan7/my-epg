@@ -1,0 +1,10 @@
+{
+  "name": "voicebot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web voice bot: Agnes chat + Edge TTS (sweet female voice), built for Cloudzyro Launch (Node 24).",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "msedge-tts": "^1.3.4" }
+}
