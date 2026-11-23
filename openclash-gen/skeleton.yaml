@@ -347,6 +347,10 @@ rules:
 - DOMAIN-SUFFIX,lan,DIRECT
 - DOMAIN-SUFFIX,local,DIRECT
 - DOMAIN-SUFFIX,home.arpa,DIRECT
+- DOMAIN,docker.1panel.live,DIRECT
+- DOMAIN,registry-1.docker.io,🇺🇸 美国节点
+- DOMAIN,auth.docker.io,🇺🇸 美国节点
+- DOMAIN,production.cloudflare.docker.com,🇺🇸 美国节点
 - GEOSITE,google-gemini,💎 Gemini
 - DOMAIN,gemini.google.com,💎 Gemini
 - DOMAIN,aistudio.google.com,💎 Gemini
