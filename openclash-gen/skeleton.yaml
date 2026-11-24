@@ -156,10 +156,13 @@ proxy-groups:
   filter: (?i)(荷兰|阿姆斯特丹|NL|Netherlands|Amsterdam|AMS)
   include-all: true
 - name: 🤖 AI服务
-  type: select
+  type: fallback
+  url: https://www.gstatic.com/generate_204
+  interval: 300
+  lazy: true
   proxies:
-  - 🇺🇸 美国节点
   - 🇯🇵 日本节点
+  - 🇺🇸 美国节点
   - 🇸🇬 新加坡节点
   - 🚀 节点选择
 - name: 💎 Gemini
