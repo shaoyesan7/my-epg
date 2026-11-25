@@ -35,23 +35,23 @@ http://10.255.128.136/PLTV/88888888/224/3221225676/10000100000000060000000000000
 http://10.255.128.136/PLTV/88888888/224/3221225644/10000100000000060000000000000181_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="CCTV15" tvg-name="CCTV-15音乐" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225678/10000100000000060000000000000215_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CCTV-15音乐
 http://10.255.128.136/PLTV/88888888/224/3221225678/10000100000000060000000000000215_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CCTV164K奥林匹克" tvg-name="CCTV-16 4K奥林匹克" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226219/10000100000000060000000000712172_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CCTV-16 4K奥林匹克
+#EXTINF:-1 tvg-id="CCTV164K" tvg-name="CCTV-16 4K奥林匹克" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226219/10000100000000060000000000712172_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CCTV-16 4K奥林匹克
 http://10.255.128.136/PLTV/88888888/224/3221226219/10000100000000060000000000712172_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="CCTV16" tvg-name="CCTV-16奥林匹克" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226274/10000100000000060000000000947655_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CCTV-16奥林匹克
 http://10.255.128.136/PLTV/88888888/224/3221226274/10000100000000060000000000947655_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="CCTV17" tvg-name="CCTV-17农业农村" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225639/10000100000000060000000000000176_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CCTV-17农业农村
 http://10.255.128.136/PLTV/88888888/224/3221225639/10000100000000060000000000000176_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN英语新闻" tvg-name="CGTN-英语新闻" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225791/10000100000000060000000000000360_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-英语新闻
+#EXTINF:-1 tvg-id="CGTN英语" tvg-name="CGTN-英语新闻" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225791/10000100000000060000000000000360_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-英语新闻
 http://10.255.128.136/PLTV/88888888/224/3221225791/10000100000000060000000000000360_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN纪录频道" tvg-name="CGTN-纪录频道(国际版)" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225792/10000100000000060000000000000361_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-纪录频道(国际版)
+#EXTINF:-1 tvg-id="CGTN纪录" tvg-name="CGTN-纪录频道(国际版)" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225792/10000100000000060000000000000361_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-纪录频道(国际版)
 http://10.255.128.136/PLTV/88888888/224/3221225792/10000100000000060000000000000361_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN俄语国际" tvg-name="CGTN-俄语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226279/10000100000000060000000000801397_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-俄语国际
+#EXTINF:-1 tvg-id="CGTN俄语" tvg-name="CGTN-俄语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226279/10000100000000060000000000801397_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-俄语国际
 http://10.255.128.136/PLTV/88888888/224/3221226279/10000100000000060000000000801397_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN西班牙语国际" tvg-name="CGTN-西班牙语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226249/10000100000000060000000000801388_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-西班牙语国际
+#EXTINF:-1 tvg-id="CGTN西班牙语" tvg-name="CGTN-西班牙语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226249/10000100000000060000000000801388_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-西班牙语国际
 http://10.255.128.136/PLTV/88888888/224/3221226249/10000100000000060000000000801388_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN阿拉伯语国际" tvg-name="CGTN-阿拉伯语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226260/10000100000000060000000000801394_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-阿拉伯语国际
+#EXTINF:-1 tvg-id="CGTN阿语" tvg-name="CGTN-阿拉伯语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226260/10000100000000060000000000801394_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-阿拉伯语国际
 http://10.255.128.136/PLTV/88888888/224/3221226260/10000100000000060000000000801394_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="CGTN法语国际" tvg-name="CGTN-法语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000000060000000000801393_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-法语国际
+#EXTINF:-1 tvg-id="CGTN法语" tvg-name="CGTN-法语国际" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000000060000000000801393_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",CGTN-法语国际
 http://10.255.128.136/PLTV/88888888/224/3221226275/10000100000000060000000000801393_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="央视台球" tvg-name="央视台球" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225798/10000100000000060000000000000424_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="央视频道",央视台球
 http://10.255.128.136/PLTV/88888888/224/3221225798/10000100000000060000000000000424_0.smil/index.m3u8?fmt=ts2hls
@@ -61,7 +61,7 @@ http://10.255.128.136/PLTV/88888888/224/3221225758/10000100000000060000000000000
 http://10.255.128.136/PLTV/88888888/224/3221225652/10000100000000060000000000000189_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="天津卫视" tvg-name="天津卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225653/10000100000000060000000000000190_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",天津卫视
 http://10.255.128.136/PLTV/88888888/224/3221225653/10000100000000060000000000000190_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="上海东方卫视" tvg-name="上海东方卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225654/10000100000000060000000000000191_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",上海东方卫视
+#EXTINF:-1 tvg-id="东方卫视" tvg-name="上海东方卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225654/10000100000000060000000000000191_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",上海东方卫视
 http://10.255.128.136/PLTV/88888888/224/3221225654/10000100000000060000000000000191_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="浙江卫视" tvg-name="浙江卫视" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225802/10000100000000060000000000009663_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="卫视频道",浙江卫视
 http://10.255.128.136/PLTV/88888888/224/3221225802/10000100000000060000000000009663_0.smil/index.m3u8?fmt=ts2hls
@@ -163,7 +163,7 @@ http://10.255.128.136/PLTV/88888888/224/3221225735/10000100000000060000000000000
 http://10.255.128.136/PLTV/88888888/224/3221226261/10000100000000060000000000801427_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="金鹰纪实" tvg-name="金鹰纪实" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225656/10000100000000060000000000000193_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",金鹰纪实
 http://10.255.128.136/PLTV/88888888/224/3221225656/10000100000000060000000000000193_0.smil/index.m3u8?fmt=ts2hls
-#EXTINF:-1 tvg-id="北京冬奥纪实" tvg-name="北京冬奥纪实" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225655/10000100000000060000000000000192_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",北京冬奥纪实
+#EXTINF:-1 tvg-id="冬奥纪实" tvg-name="北京冬奥纪实" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221225655/10000100000000060000000000000192_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",北京冬奥纪实
 http://10.255.128.136/PLTV/88888888/224/3221225655/10000100000000060000000000000192_0.smil/index.m3u8?fmt=ts2hls
 #EXTINF:-1 tvg-id="安多藏语综合" tvg-name="安多藏语综合" catchup="default" catchup-source="http://10.255.128.136/PLTV/88888888/224/3221226265/10000100000000060000000000863648_0.smil/index.m3u8?fmt=ts2hls&playseek={(b)yyyyMMddHHmmss}-{(e)yyyyMMddHHmmss}" group-title="其他频道",安多藏语综合
 http://10.255.128.136/PLTV/88888888/224/3221226265/10000100000000060000000000863648_0.smil/index.m3u8?fmt=ts2hls
