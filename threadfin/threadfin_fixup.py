@@ -85,8 +85,8 @@ EXTRA_PROVIDERS = [
     # live-jacktv.m3u is the jackTV playlist with every entry whose
     # tvg-id also appears in the other playlists stripped out (the CCTV
     # block etc.), so it can never poison the telecom records through
-    # Threadfin's merge by tvg-id. NEVER register the original jackTV
-    # URL (php.946985.filegear-sg.me) here again.
+    # Threadfin's merge by tvg-id. NEVER register the original
+    # (unfiltered) jackTV URL here again.
     ("jackTV", "https://raw.githubusercontent.com/shaoyesan7/my-epg/main/live-jacktv.m3u"),
 ]
 
