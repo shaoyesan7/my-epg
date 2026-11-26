@@ -11,7 +11,9 @@ ts=$(date '+%Y-%m-%d %H:%M:%S')
 
 docker stop threadfin >/dev/null 2>&1
 
-if docker run --rm --entrypoint python3 -v "$CONF":/tf "$IMG" /tf/threadfin_fixup.py /tf/xepg.json >>"$LOG" 2>&1; then
+EPG1=https://raw.githubusercontent.com/shaoyesan7/my-epg/main/epg.xml.gz
+EPG2=https://epg.sxhz.de5.net/epg/index.php?type=gz
+if docker run --rm --entrypoint python3 -v "$CONF":/tf "$IMG" /tf/threadfin_fixup.py /tf/xepg.json "$EPG1" "$EPG2" >>"$LOG" 2>&1; then
     echo "$ts fixup OK" >>"$LOG"
 else
     echo "$ts fixup FAILED - restoring latest backup" >>"$LOG"

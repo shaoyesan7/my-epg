@@ -227,7 +227,7 @@ http://10.255.128.136/PLTV/88888888/224/3221225661/10000100000000060000000000000
 http://vip1.xinketongxun.fun:8082/tsfile/live/1026_1.m3u8
 #EXTINF:-1 tvg-id="CCTV8K" tvg-name="CCTV-8K HD (1080p)" tvg-logo="https://i.imgur.com/fxVPMJF.png" group-title="央视频道",CCTV-8K HD (1080p)
 http://192.151.150.154/live/cctv8k.m3u8
-#EXTINF:-1 tvg-id="CCTV" tvg-name="CCTV4K" tvg-logo="https://gitee.com/suxuang/logo/raw/master/mylogo/CCTV4K.png" group-title="央视频道",CCTV4K
+#EXTINF:-1 tvg-id="CCTV4K" tvg-name="CCTV4K" tvg-logo="https://gitee.com/suxuang/logo/raw/master/mylogo/CCTV4K.png" group-title="央视频道",CCTV4K
 http://p.ytelc.com/169l/0/cctv.php?id=cctv4k
 #EXTINF:-1 tvg-id="CCTV+1" tvg-name="CCTV+ 1 (600p)" tvg-logo="https://i.imgur.com/U8d4Is6.png" group-title="央视频道",CCTV+ 1 (600p)
 https://cd-live-stream.news.cctvplus.com/live/smil:CHANNEL1.smil/playlist.m3u8
@@ -1225,7 +1225,7 @@ https://live.metshop.top/huya/29465852
 https://live.metshop.top/huya/11352941
 #EXTINF:-1 tvg-id="华语影视" tvg-name="华语影视" tvg-logo="https://gitee.com/suxuang/logo/raw/master/mylogo/斗鱼.png" group-title="其他频道",华语影视
 http://www.goodiptv.club/douyu/3928
-#EXTINF:-1 tvg-id="南国都市" tvg-name="南国都市4K" tvg-logo="https://gitee.com/suxuang/logo/raw/master/mylogo/南国都市4K.png" group-title="其他频道",南国都市4K
+#EXTINF:-1 tvg-id="南国都市4K" tvg-name="南国都市4K" tvg-logo="https://gitee.com/suxuang/logo/raw/master/mylogo/南国都市4K.png" group-title="其他频道",南国都市4K
 https://tencentplay.gztv.com/live/nanguodushi.m3u8?txSecret=550af55c0ea34ce492748481415b6dfa&txTime=1903e7b17de
 #EXTINF:-1 tvg-id="南宁影视娱乐" tvg-name="南宁影视娱乐" tvg-logo="https://www.xn--rgv465a.top/tvlogo/南宁影视娱乐.png" group-title="其他频道",南宁影视娱乐
 http://hls.nntv.cn/nnlive/YSYL_244.m3u8

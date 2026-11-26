@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v3). Three jobs, in order:
+Patch Threadfin's exported M3U (v4). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
      keeping their relative order; all other channels follow in theirs.
+     Inside the non-telecom block, entries of the CCTV group are then
+     natural-sorted by channel number (CCTV-2 before CCTV-10, CGTN after
+     the numbered CCTV channels); no other entry changes position.
      tvg-chno is then renumbered 1..N in file order, so apps that sort
      by channel number show the same order as apps that follow file order.
   2. CATCHUP: Threadfin drops the catchup / catchup-source attributes of
@@ -151,6 +154,39 @@ def main():
         return (front, old_chno(e["block"][0]), e["idx"])
 
     entries.sort(key=sort_key)
+
+    # --- job 1b: natural-sort the CCTV group inside the non-telecom block ---
+    def display_name(line):
+        in_quotes = False
+        for i, ch in enumerate(line):
+            if ch == '"':
+                in_quotes = not in_quotes
+            elif ch == "," and not in_quotes:
+                return line[i + 1:].strip()
+        return ""
+
+    def group_title(line):
+        m = re.search(r'group-title="([^"]*)"', line)
+        return m.group(1) if m else ""
+
+    def cctv_key(e):
+        name = display_name(e["block"][0])
+        m = re.match(r"CCTV-?(\d+)", name)
+        if m:
+            return (0, int(m.group(1)), name)
+        if name.startswith("CGTN"):
+            return (1, 0, name)
+        return (2, 0, name)
+
+    tail_positions = [
+        i for i, e in enumerate(entries)
+        if not (e["info"] and e["info"]["telecom"]) and "央视" in group_title(e["block"][0])
+    ]
+    if len(tail_positions) > 1:
+        picked = sorted((entries[i] for i in tail_positions), key=cctv_key)
+        for pos, e in zip(tail_positions, picked):
+            entries[pos] = e
+
     telecom_front = sum(1 for e in entries if e["info"] and e["info"]["telecom"])
     for n, e in enumerate(entries, start=1):
         e["block"][0] = CHNO_RE.sub('tvg-chno="%d"' % n, e["block"][0], count=1)

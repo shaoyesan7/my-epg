@@ -7,7 +7,16 @@ What it does, in order:
   1. Activate every channel (x-active = true), except channels the user hid
      (x-hide-channel = true stays untouched). This undoes Threadfin's rule
      that new channels whose tvg-id matches no EPG stay inactive.
-  2. Telecom-first dedupe: channels that share the same cleaned display name
+  2. Repair EPG mappings: Threadfin's own auto-mapping only ever runs for
+     INACTIVE channels with no XMLTV file assigned (see mapping() in its
+     xepg.go), so an active channel whose tvg-id was fixed later keeps an
+     empty mapping forever and shows no programme guide. For every active
+     channel whose x-mapping is empty / "-", if its tvg-id exists as a
+     channel id in one of the EPG sources, set x-xmltv-file + x-mapping.
+     Evidence order: (a) mappings already used by healthy channels in this
+     DB, (b) channel ids fetched from the EPG URLs passed on the command
+     line (file rank = healthy-mapping count, descending).
+  3. Telecom-first dedupe: channels that share the same cleaned display name
      are grouped; the copy from the highest-priority playlist stays active,
      the rest are deactivated. Priority: LN-Telecom > Combined > Hudie > others.
      Within one playlist tier, a copy that carries an EPG mapping wins.
@@ -19,10 +28,12 @@ Safety:
   - Any error -> non-zero exit, original file left untouched (the wrapper
     restores the backup and restarts the container).
 
-Usage: python3 threadfin_fixup.py /path/to/xepg.json
-Prints one summary line: total=.. newly_activated=.. deduped_off=.. active_final=..
+Usage: python3 threadfin_fixup.py /path/to/xepg.json [epg-url ...]
+Prints one summary line: total=.. newly_activated=.. mapping_repaired=..
+deduped_off=.. active_final=.. plus one line per repaired mapping.
 """
 
+import gzip
 import json
 import os
 import re
@@ -60,11 +71,73 @@ def display_name(ch):
     return ch.get("x-name") or ch.get("name") or ""
 
 
+def fetch_epg_channel_ids(url):
+    """Channel ids of one XMLTV source (gzip or plain), or None on failure."""
+    try:
+        import urllib.request
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+        if raw[:2] == b"\x1f\x8b":
+            raw = gzip.decompress(raw)
+        text = raw.decode("utf-8", errors="replace")
+        return set(re.findall(r'<channel id="([^"]+)"', text))
+    except Exception as e:
+        print("epg fetch failed (%s): %s" % (url, e))
+        return None
+
+
+def repair_mappings(channels, epg_urls):
+    """Fill empty x-mapping for active channels whose tvg-id is a known
+    XMLTV channel id. Returns the list of (name, tvg-id, file) repairs."""
+    healthy_files = {}
+    known_ids = {}
+    for ch in channels:
+        m = (ch.get("x-mapping") or "").strip()
+        f = (ch.get("x-xmltv-file") or "").strip()
+        if m and m != "-" and f and f != "-":
+            healthy_files[f] = healthy_files.get(f, 0) + 1
+            known_ids.setdefault(f, set()).add(m)
+    file_rank = sorted(healthy_files, key=lambda f: -healthy_files[f])
+
+    epg_id_sets = []
+    for url in epg_urls:
+        ids = fetch_epg_channel_ids(url)
+        epg_id_sets.append(ids if ids is not None else set())
+
+    repairs = []
+    for ch in channels:
+        if ch.get("x-hide-channel") or not ch.get("x-active"):
+            continue
+        m = (ch.get("x-mapping") or "").strip()
+        if m and m != "-":
+            continue
+        tvg = (ch.get("tvg-id") or "").strip()
+        if not tvg:
+            continue
+        target = None
+        for f in file_rank:
+            if tvg in known_ids.get(f, ()):
+                target = f
+                break
+        if target is None:
+            for i, ids in enumerate(epg_id_sets):
+                if tvg in ids and i < len(file_rank):
+                    target = file_rank[i]
+                    break
+        if target is not None:
+            ch["x-xmltv-file"] = target
+            ch["x-mapping"] = tvg
+            repairs.append((display_name(ch), tvg, target))
+    return repairs
+
+
 def main():
-    if len(sys.argv) != 2:
-        print("usage: threadfin_fixup.py <xepg.json>", file=sys.stderr)
+    if len(sys.argv) < 2:
+        print("usage: threadfin_fixup.py <xepg.json> [epg-url ...]", file=sys.stderr)
         return 2
     path = sys.argv[1]
+    epg_urls = sys.argv[2:]
 
     with open(path, "r", encoding="utf-8") as f:
         db = json.load(f)
@@ -97,7 +170,12 @@ def main():
             ch["x-active"] = True
             newly_activated += 1
 
-    # --- step 2: telecom-first dedupe by cleaned display name ---
+    # --- step 2: repair EPG mappings Threadfin will never fix itself ---
+    repairs = repair_mappings(channels, epg_urls)
+    for name, tvg, f in repairs:
+        print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
+
+    # --- step 3: telecom-first dedupe by cleaned display name ---
     groups = {}
     for ch in channels:
         if ch.get("x-hide-channel"):
@@ -132,8 +210,8 @@ def main():
     os.replace(tmp, path)
 
     print(
-        "total=%d newly_activated=%d deduped_off=%d active_final=%d"
-        % (total, newly_activated, deduped_off, active_final)
+        "total=%d newly_activated=%d mapping_repaired=%d deduped_off=%d active_final=%d"
+        % (total, newly_activated, len(repairs), deduped_off, active_final)
     )
     return 0
 
