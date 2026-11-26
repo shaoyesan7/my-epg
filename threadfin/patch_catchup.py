@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v4). Three jobs, in order:
+Patch Threadfin's exported M3U (v5). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
      keeping their relative order; all other channels follow in theirs.
-     Inside the non-telecom block, entries of the CCTV group are then
-     natural-sorted by channel number (CCTV-2 before CCTV-10, CGTN after
-     the numbered CCTV channels); no other entry changes position.
+     Then EVERY entry of the CCTV group (telecom and non-telecom alike)
+     is sorted as one family: numbered CCTV channels by number (CCTV-2
+     before CCTV-10, same-number variants keep their relative order),
+     then the unnumbered CCTV specialty channels, then CGTN, then any
+     other group members. v4 sorted only the non-telecom block, which
+     left the specialty channels clumped in front of CCTV-1 in the app.
      tvg-chno is then renumbered 1..N in file order, so apps that sort
      by channel number show the same order as apps that follow file order.
   2. CATCHUP: Threadfin drops the catchup / catchup-source attributes of
@@ -44,8 +47,9 @@ STREAM_ID_RE = re.compile(r"/stream/([0-9a-f]{32})")
 
 
 def parse_source(path):
-    """Return {live_url: 'catchup=".." catchup-source=".."'} from a source M3U."""
-    mapping = {}
+    """Return ({live_url: 'catchup=".." catchup-source=".."'}, {live_url: rank})
+    from a source M3U; rank is the URL's position in the playlist."""
+    mapping, order = {}, {}
     pending_attrs = None
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         for line in f:
@@ -56,14 +60,19 @@ def parse_source(path):
                 if found:
                     pending_attrs = " ".join('%s="%s"' % kv for kv in found)
             elif line and not line.startswith("#"):
+                url = line.strip()
+                if url not in order:
+                    order[url] = len(order)
                 if pending_attrs:
-                    mapping[line.strip()] = pending_attrs
+                    mapping[url] = pending_attrs
                 pending_attrs = None
-    return mapping
+    return mapping, order
 
 
-def load_channel_index(db_path, catchup_by_url):
-    """Return {stream_id: {"telecom": bool, "catchup": str|None}} from xepg.json."""
+def load_channel_index(db_path, catchup_by_url, source_order=None):
+    """Return {stream_id: {"telecom": bool, "catchup": str|None, "rank": int|None}}
+    from xepg.json. rank is the channel's position in the telecom playlist,
+    which (unlike tvg-chno) means the same thing on every run."""
     with open(db_path, "r", encoding="utf-8") as f:
         db = json.load(f)
     index = {}
@@ -74,7 +83,11 @@ def load_channel_index(db_path, catchup_by_url):
             continue
         stream_id = hashlib.md5(("%s-%s" % (file_id, url)).encode("utf-8")).hexdigest()
         telecom = TELECOM_PLAYLIST in (ch.get("_file.m3u.name") or "") or TELECOM_HOST in url
-        index[stream_id] = {"telecom": telecom, "catchup": catchup_by_url.get(url)}
+        index[stream_id] = {
+            "telecom": telecom,
+            "catchup": catchup_by_url.get(url),
+            "rank": source_order.get(url) if source_order else None,
+        }
     return index
 
 
@@ -100,11 +113,11 @@ def main():
         return 2
     target_path, db_path, source_path = sys.argv[1], sys.argv[2], sys.argv[3]
 
-    catchup_by_url = parse_source(source_path)
+    catchup_by_url, source_order = parse_source(source_path)
     if not catchup_by_url:
         print("ERROR: no catchup attributes found in source", file=sys.stderr)
         return 1
-    index = load_channel_index(db_path, catchup_by_url)
+    index = load_channel_index(db_path, catchup_by_url, source_order)
     if not index:
         print("ERROR: channel index is empty", file=sys.stderr)
         return 1
@@ -148,10 +161,16 @@ def main():
     resolved = sum(1 for e in entries if e["info"] is not None)
     unresolved = len(entries) - resolved
 
-    # --- job 1: telecom first (stable), then renumber tvg-chno 1..N ---
+    # --- job 1: telecom first, then renumber tvg-chno 1..N ---
+    # Telecom entries order by their rank in the source playlist, NOT by
+    # tvg-chno: after one patch run the chnos are the patcher's own, and
+    # keying on them let non-CCTV telecom channels drift on the next run
+    # (v5 self-test caught this). Playlist rank is run-invariant.
     def sort_key(e):
-        front = 0 if (e["info"] and e["info"]["telecom"]) else 1
-        return (front, old_chno(e["block"][0]), e["idx"])
+        if e["info"] and e["info"]["telecom"]:
+            rank = e["info"]["rank"]
+            return (0, rank if rank is not None else old_chno(e["block"][0]), e["idx"])
+        return (1, old_chno(e["block"][0]), e["idx"])
 
     entries.sort(key=sort_key)
 
@@ -170,21 +189,25 @@ def main():
         return m.group(1) if m else ""
 
     def cctv_key(e):
+        # Stable sort: numbered CCTV by number, then CCTV specialty
+        # channels, then CGTN, then anything else; relative order inside
+        # each class is preserved.
         name = display_name(e["block"][0])
-        m = re.match(r"CCTV-?(\d+)", name)
+        m = re.match(r"CCTV[- ]?(\d+)", name)
         if m:
-            return (0, int(m.group(1)), name)
+            return (0, int(m.group(1)))
+        if name.startswith("CCTV"):
+            return (1, 0)
         if name.startswith("CGTN"):
-            return (1, 0, name)
-        return (2, 0, name)
+            return (2, 0)
+        return (3, 0)
 
-    tail_positions = [
-        i for i, e in enumerate(entries)
-        if not (e["info"] and e["info"]["telecom"]) and "央视" in group_title(e["block"][0])
+    group_positions = [
+        i for i, e in enumerate(entries) if "央视" in group_title(e["block"][0])
     ]
-    if len(tail_positions) > 1:
-        picked = sorted((entries[i] for i in tail_positions), key=cctv_key)
-        for pos, e in zip(tail_positions, picked):
+    if len(group_positions) > 1:
+        picked = sorted((entries[i] for i in group_positions), key=cctv_key)
+        for pos, e in zip(group_positions, picked):
             entries[pos] = e
 
     telecom_front = sum(1 for e in entries if e["info"] and e["info"]["telecom"])
