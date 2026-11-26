@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Threadfin xepg.json fixup - run on the box while the threadfin container is STOPPED.
+Threadfin xepg.json fixup v3.3 - run on the box while the threadfin container is STOPPED.
 
 What it does, in order:
+  0. Provider upkeep in settings.json: keep EXTRA_PROVIDERS registered;
+     remove REMOVE_PROVIDERS (v3.3: jackTV retired - its playlist carries
+     CCTV channels whose tvg-ids collide with the telecom playlist's, and
+     Threadfin's cross-playlist merge by tvg-id overwrote the telecom
+     records' stream URLs with jackTV's, breaking CCTV playback). DB
+     records belonging to a removed provider are dropped, EXCEPT records
+     whose tvg-id belongs to the telecom playlist - those are merge
+     victims, kept and repaired by the URL restore in step 2b.
   1. Activate every channel (x-active = true), except channels the user hid
      (x-hide-channel = true stays untouched). This undoes Threadfin's rule
      that new channels whose tvg-id matches no EPG stay inactive.
@@ -14,6 +22,12 @@ What it does, in order:
      carried tvg-id "上海东方卫视" a day after the playlist fix). For every
      DB channel whose URL appears in a playlist with a different tvg-id,
      adopt the playlist's tvg-id (internal keys are left untouched).
+  2b. Restore stream URLs by tvg-id (v3.3): for every DB channel whose
+     tvg-id exists in the telecom playlist, force its URL back to the
+     telecom playlist's URL for that tvg-id. This undoes the URL half
+     of the tvg-id merge in step 0's note (the poisoned record keeps the
+     telecom name and tvg-id, so the URL-keyed sync in step 2 cannot
+     see it).
   3. Repair EPG mappings: Threadfin's own auto-mapping only ever runs for
      INACTIVE channels with no XMLTV file assigned (see mapping() in its
      xepg.go), so an active channel whose tvg-id was fixed later keeps an
@@ -59,9 +73,16 @@ KEEP_BACKUPS = 3
 # Extra providers to keep registered in settings.json (name, source URL).
 # Threadfin downloads them like any UI-added playlist; registering here
 # means a new source never needs the web UI or manual URL entry
-# (added 2026-11-26 for jackTV, whose server forces a file download
+# (added 2026-11-26 for sources whose servers force a file download
 # instead of giving a copyable subscription link).
-EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u"), ("hrtv", "https://hrtv.118138.xyz/tv_proxy.m3u")]
+EXTRA_PROVIDERS = [("hrtv", "https://hrtv.118138.xyz/tv_proxy.m3u")]
+
+# Providers to REMOVE from settings.json (v3.3): remove_providers()
+# deletes their registrations and their DB records. jackTV is retired
+# because its playlist poisons the telecom CCTV records through
+# Threadfin's cross-playlist merge by tvg-id (see the docstring); the
+# user watches jackTV through Ku9 instead, never through Threadfin.
+REMOVE_PROVIDERS = ["jackTV"]
 
 # Bracket pairs used as name decorations: () [] and the CJK variants
 # (written as escapes so this file stays pure ASCII outside the names above).
@@ -202,6 +223,24 @@ def repair_mappings(channels, epg_urls):
     return repairs
 
 
+def _save_settings(settings_path, settings):
+    """Write settings.json back with the same safety as the xepg write:
+    timestamped backup (newest KEEP_BACKUPS kept), then temp + rename."""
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    shutil.copy2(settings_path, "%s.bak-%s" % (settings_path, stamp))
+    folder = os.path.dirname(settings_path) or "."
+    siblings = sorted(p for p in os.listdir(folder) if p.startswith("settings.json.bak-"))
+    for old in siblings[:-KEEP_BACKUPS]:
+        try:
+            os.remove(os.path.join(folder, old))
+        except OSError:
+            pass
+    tmp = settings_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(settings, f, ensure_ascii=False)
+    os.replace(tmp, settings_path)
+
+
 def register_providers(xepg_path):
     """Ensure EXTRA_PROVIDERS exist in settings.json (same folder as
     xepg.json), mimicking a UI-added playlist: clone the most complete
@@ -248,22 +287,89 @@ def register_providers(xepg_path):
 
     if not registered:
         return []
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    shutil.copy2(settings_path, "%s.bak-%s" % (settings_path, stamp))
-    folder = os.path.dirname(settings_path) or "."
-    siblings = sorted(p for p in os.listdir(folder) if p.startswith("settings.json.bak-"))
-    for old in siblings[:-KEEP_BACKUPS]:
-        try:
-            os.remove(os.path.join(folder, old))
-        except OSError:
-            pass
-    tmp = settings_path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(settings, f, ensure_ascii=False)
-    os.replace(tmp, settings_path)
+    _save_settings(settings_path, settings)
     for name in registered:
         print("provider_registered=%s" % name)
     return registered
+
+
+def find_telecom_map(playlist_maps):
+    """The telecom playlist's {url: (tvg-id, logo)} map, identified by
+    content: its stream URLs are PLTV (10.255.128.136). {} if absent."""
+    best, best_hits = {}, 0
+    for pm in playlist_maps:
+        if not pm:
+            continue
+        hits = sum(1 for u in pm if "10.255.128.136" in u)
+        if hits > best_hits:
+            best, best_hits = pm, hits
+    return best
+
+
+def remove_providers(xepg_path, db, telecom_tvgids):
+    """Remove REMOVE_PROVIDERS: (a) delete their entries from
+    settings.json files.m3u (persisted via _save_settings, the same
+    write-back registration uses), (b) drop DB records that belong to
+    them - EXCEPT records whose tvg-id is a telecom tvg-id: those are
+    telecom channels Threadfin merged with the removed provider's
+    entries, and the URL restore repairs them instead of dropping them.
+    The DB half is skipped when the telecom playlist could not be
+    fetched: without its tvg-id set, merge victims cannot be told apart
+    from the provider's own channels, and dropping a victim would delete
+    the only DB copy of a telecom channel. Prints one
+    provider_removed=<name> records_dropped=<n> line per provider.
+    Never raises."""
+    settings_path = os.path.join(os.path.dirname(xepg_path) or ".", "settings.json")
+    try:
+        with open(settings_path, "r", encoding="utf-8") as f:
+            settings = json.load(f)
+        m3u_files = settings.get("files", {}).get("m3u", {})
+        if isinstance(m3u_files, dict):
+            doomed = [k for k, e in m3u_files.items()
+                      if (e or {}).get("name") in REMOVE_PROVIDERS]
+            for k in doomed:
+                del m3u_files[k]
+            if doomed:
+                _save_settings(settings_path, settings)
+    except Exception as e:
+        print("provider remove (settings) skipped: %s" % e)
+
+    dropped = dict((name, 0) for name in REMOVE_PROVIDERS)
+    if telecom_tvgids:
+        for key in list(db.keys()):
+            ch = db[key]
+            pname = ch.get("_file.m3u.name") or ""
+            if pname not in REMOVE_PROVIDERS:
+                continue
+            tvg = (ch.get("tvg-id") or "").strip()
+            if tvg and tvg in telecom_tvgids:
+                continue  # merge victim - kept, URL restored later
+            del db[key]
+            dropped[pname] += 1
+    else:
+        print("provider remove (db) skipped: telecom playlist unavailable")
+    for name in REMOVE_PROVIDERS:
+        print("provider_removed=%s records_dropped=%d" % (name, dropped[name]))
+    return dropped
+
+
+def url_restore_by_tvgid(channels, telecom_url_by_tvgid):
+    """Force every DB channel whose tvg-id is a telecom tvg-id back to
+    the telecom playlist's stream URL for that tvg-id. Undoes Threadfin's
+    cross-playlist merge by tvg-id, which overwrites a telecom record's
+    URL with the colliding playlist's URL (v3.3: jackTV's CCTV entries
+    vs the telecom CCTV channels). Prints url_restored=<n>."""
+    restored = 0
+    for ch in channels:
+        tvg = (ch.get("tvg-id") or "").strip()
+        if not tvg or tvg not in telecom_url_by_tvgid:
+            continue
+        want = telecom_url_by_tvgid[tvg]
+        if (ch.get("url") or "").strip() != want:
+            ch["url"] = want
+            restored += 1
+    print("url_restored=%d" % restored)
+    return restored
 
 
 def main():
@@ -292,8 +398,27 @@ def main():
         except OSError:
             pass
 
-    # --- step 0: keep extra providers (jackTV) registered in settings ---
+    # --- step 0: provider upkeep in settings.json ---
     register_providers(path)
+
+    # --- fetch the extra URLs once: M3U playlists feed the provider
+    # removal, the identity sync and the URL restore; XMLTV sources feed
+    # the mapping repair (classified by suffix, as before) ---
+    epg_urls, playlist_maps = [], []
+    for u in extra_urls:
+        if u.endswith(".m3u"):
+            playlist_maps.append(fetch_playlist_tvgids(u))
+        else:
+            epg_urls.append(u)
+    telecom_map = find_telecom_map(playlist_maps)
+    telecom_tvgids = set(t for (t, _logo) in telecom_map.values() if t)
+    telecom_url_by_tvgid = {}
+    for u, (t, _logo) in telecom_map.items():
+        if t and t not in telecom_url_by_tvgid:
+            telecom_url_by_tvgid[t] = u
+
+    # --- step 0b: remove retired providers (jackTV) ---
+    remove_providers(path, db, telecom_tvgids)
 
     channels = list(db.values())
     total = len(channels)
@@ -307,18 +432,14 @@ def main():
             ch["x-active"] = True
             newly_activated += 1
 
-    # --- step 2: sync tvg-ids from the playlists, then repair mappings ---
-    epg_urls, playlist_maps = [], []
-    for u in extra_urls:
-        if u.endswith(".m3u"):
-            playlist_maps.append(fetch_playlist_tvgids(u))
-        else:
-            epg_urls.append(u)
+    # --- step 2: sync tvg-ids from the playlists, restore telecom URLs
+    # by tvg-id, then repair mappings ---
     synced, logo_synced = sync_tvg_ids(channels, playlist_maps)
     for name, old, new in synced:
         print("tvg-id synced: %s %s -> %s" % (name, old, new))
     for name, logo in logo_synced:
         print("logo synced: %s" % name)
+    url_restore_by_tvgid(channels, telecom_url_by_tvgid)
     repairs = repair_mappings(channels, epg_urls)
     for name, tvg, f in repairs:
         print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
