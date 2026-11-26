@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-26 04:00:02 +0800",
+  "generated_at": "2026-11-26 12:14:33 +0800",
   "window": [
     "2026-11-20",
     "2026-11-29"
   ],
-  "channels": 776,
-  "programmes": 171654,
+  "channels": 794,
+  "programmes": 171078,
   "date_range": [
     "20261120",
-    "20261127"
+    "20261128"
   ],
   "dates": [
     "20261120",
@@ -18,12 +18,13 @@
     "20261124",
     "20261125",
     "20261126",
-    "20261127"
+    "20261127",
+    "20261128"
   ],
   "sources": {
-    "zsdc": "channels=117 added_programmes=30769",
-    "kuke31": "channels=511 added_programmes=109987",
-    "plsy1": "channels=163 added_programmes=25757",
-    "112114": "channels=291 added_programmes=5141"
+    "zsdc": "channels=112 added_programmes=30892",
+    "kuke31": "channels=500 added_programmes=108665",
+    "plsy1": "channels=163 added_programmes=24735",
+    "112114": "channels=347 added_programmes=6786"
   }
 }
