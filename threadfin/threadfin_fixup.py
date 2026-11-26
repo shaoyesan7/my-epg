@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Threadfin xepg.json fixup v3.4 - run on the box while the threadfin container is STOPPED.
+Threadfin xepg.json fixup v3.4.1 - run on the box while the threadfin container is STOPPED.
 
 What it does, in order:
   0. Provider upkeep in settings.json: keep EXTRA_PROVIDERS registered;
@@ -44,6 +44,11 @@ What it does, in order:
      the rest are deactivated. Priority: LN-Telecom > hrtv > Combined >
      Hudie > jackTV (lowest - a jackTV copy never wins a name tie).
      Within one playlist tier, a copy that carries an EPG mapping wins.
+     v3.4.1: champions are picked per category - jackTV records and hrtv
+     records each keep their own best copy inside a name group, separate
+     from the main lists' champion, so the three can stay active side by
+     side instead of eating each other; only duplicates within the same
+     category still collapse to one.
 
 Safety:
   - A timestamped backup of the original file is written next to it first
@@ -458,6 +463,22 @@ def main():
         print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
 
     # --- step 3: telecom-first dedupe by cleaned display name ---
+    # v3.4.1: champions are picked PER CATEGORY, not per name group.
+    # jackTV and hrtv each form their own category (matched by
+    # _file.m3u.name, same substring style as playlist_rank); every
+    # other playlist is the "main" category. The best record of each
+    # non-empty category stays active, so a jackTV copy and an hrtv
+    # copy of the same channel name no longer eat each other (or the
+    # main lists' copy); duplicates WITHIN one category still collapse
+    # to a single champion, chosen by the usual priority + tie-breaks.
+    def dedupe_category(ch):
+        pname = ch.get("_file.m3u.name") or ""
+        if "jackTV" in pname:
+            return "jackTV"
+        if "hrtv" in pname:
+            return "hrtv"
+        return "main"
+
     groups = {}
     for ch in channels:
         if ch.get("x-hide-channel"):
@@ -477,11 +498,17 @@ def main():
                 0 if ch.get("x-mapping") else 1,  # EPG-mapped copy wins ties
             )
 
-        members.sort(key=sort_key)
-        for loser in members[1:]:
-            if loser.get("x-active"):
-                loser["x-active"] = False
-                deduped_off += 1
+        by_category = {}
+        for ch in members:
+            by_category.setdefault(dedupe_category(ch), []).append(ch)
+        for cat_members in by_category.values():
+            if len(cat_members) < 2:
+                continue
+            cat_members.sort(key=sort_key)
+            for loser in cat_members[1:]:
+                if loser.get("x-active"):
+                    loser["x-active"] = False
+                    deduped_off += 1
 
     active_final = sum(1 for ch in channels if ch.get("x-active"))
 
