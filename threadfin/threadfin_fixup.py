@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Threadfin xepg.json fixup v3.3 - run on the box while the threadfin container is STOPPED.
+Threadfin xepg.json fixup v3.4 - run on the box while the threadfin container is STOPPED.
 
 What it does, in order:
   0. Provider upkeep in settings.json: keep EXTRA_PROVIDERS registered;
-     remove REMOVE_PROVIDERS (v3.3: jackTV retired - its playlist carries
-     CCTV channels whose tvg-ids collide with the telecom playlist's, and
-     Threadfin's cross-playlist merge by tvg-id overwrote the telecom
-     records' stream URLs with jackTV's, breaking CCTV playback). DB
-     records belonging to a removed provider are dropped, EXCEPT records
-     whose tvg-id belongs to the telecom playlist - those are merge
-     victims, kept and repaired by the URL restore in step 2b.
+     remove REMOVE_PROVIDERS (currently EMPTY - the v3.3 removal of
+     jackTV was a one-off; v3.4 brings jackTV back, but only through the
+     filtered playlist live-jacktv.m3u, whose entries with tvg-ids that
+     collide with the other playlists were stripped at the source, so
+     Threadfin's cross-playlist merge by tvg-id can no longer overwrite
+     the telecom records' stream URLs with jackTV's). DB records
+     belonging to a removed provider are dropped, EXCEPT records whose
+     tvg-id belongs to the telecom playlist - those are merge victims,
+     kept and repaired by the URL restore in step 2b.
   1. Activate every channel (x-active = true), except channels the user hid
      (x-hide-channel = true stays untouched). This undoes Threadfin's rule
      that new channels whose tvg-id matches no EPG stay inactive.
@@ -39,7 +41,8 @@ What it does, in order:
      line (file rank = healthy-mapping count, descending).
   4. Telecom-first dedupe: channels that share the same cleaned display name
      are grouped; the copy from the highest-priority playlist stays active,
-     the rest are deactivated. Priority: LN-Telecom > Combined > Hudie > others.
+     the rest are deactivated. Priority: LN-Telecom > hrtv > Combined >
+     Hudie > jackTV (lowest - a jackTV copy never wins a name tie).
      Within one playlist tier, a copy that carries an EPG mapping wins.
 
 Safety:
@@ -66,8 +69,9 @@ import sys
 import time
 
 # Playlist priority by substring of the playlist name (_file.m3u.name):
-# Liaoning Telecom first, then the combined source, then Hudie picks.
-PLAYLIST_PRIORITY = ["辽宁电信", "hrtv", "综合源", "蝴蝶精选"]
+# Liaoning Telecom first, then hrtv, the combined source, Hudie picks,
+# and jackTV last (its copies always lose a name-dedupe tie).
+PLAYLIST_PRIORITY = ["辽宁电信", "hrtv", "综合源", "蝴蝶精选", "jackTV"]
 KEEP_BACKUPS = 3
 
 # Extra providers to keep registered in settings.json (name, source URL).
@@ -75,14 +79,22 @@ KEEP_BACKUPS = 3
 # means a new source never needs the web UI or manual URL entry
 # (added 2026-11-26 for sources whose servers force a file download
 # instead of giving a copyable subscription link).
-EXTRA_PROVIDERS = [("hrtv", "https://hrtv.118138.xyz/tv_proxy.m3u")]
+EXTRA_PROVIDERS = [
+    ("hrtv", "https://hrtv.118138.xyz/tv_proxy.m3u"),
+    # jackTV returns in v3.4, but ONLY via the filtered copy in the repo:
+    # live-jacktv.m3u is the jackTV playlist with every entry whose
+    # tvg-id also appears in the other playlists stripped out (the CCTV
+    # block etc.), so it can never poison the telecom records through
+    # Threadfin's merge by tvg-id. NEVER register the original jackTV
+    # URL (php.946985.filegear-sg.me) here again.
+    ("jackTV", "https://raw.githubusercontent.com/shaoyesan7/my-epg/main/live-jacktv.m3u"),
+]
 
-# Providers to REMOVE from settings.json (v3.3): remove_providers()
-# deletes their registrations and their DB records. jackTV is retired
-# because its playlist poisons the telecom CCTV records through
-# Threadfin's cross-playlist merge by tvg-id (see the docstring); the
-# user watches jackTV through Ku9 instead, never through Threadfin.
-REMOVE_PROVIDERS = ["jackTV"]
+# Providers to REMOVE from settings.json: remove_providers() deletes
+# their registrations and their DB records. Currently EMPTY - the
+# v3.3 removal of jackTV was a one-off (its original playlist poisoned
+# the telecom CCTV records; v3.4 re-adds it filtered, see above).
+REMOVE_PROVIDERS = []
 
 # Bracket pairs used as name decorations: () [] and the CJK variants
 # (written as escapes so this file stays pure ASCII outside the names above).
@@ -417,7 +429,8 @@ def main():
         if t and t not in telecom_url_by_tvgid:
             telecom_url_by_tvgid[t] = u
 
-    # --- step 0b: remove retired providers (jackTV) ---
+    # --- step 0b: remove retired providers (REMOVE_PROVIDERS, currently
+    # empty - the v3.3 jackTV removal was a one-off) ---
     remove_providers(path, db, telecom_tvgids)
 
     channels = list(db.values())
