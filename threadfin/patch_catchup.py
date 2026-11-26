@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v5). Three jobs, in order:
+Patch Threadfin's exported M3U (v5.2). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
-     keeping their relative order; all other channels follow in theirs.
+     keeping their relative order; the hrtv playlist (a Hong Kong /
+     Taiwan source the user asked to sit right behind Telecom) forms
+     the second block in its own relative order; all other channels
+     follow in theirs.
      Then EVERY entry of the CCTV group (telecom and non-telecom alike)
      is sorted as one family: numbered CCTV channels by number (CCTV-2
      before CCTV-10, same-number variants keep their relative order),
@@ -41,6 +44,7 @@ import sys
 
 TELECOM_HOST = "10.255.128.136"
 TELECOM_PLAYLIST = "辽宁电信"
+HRTV_PLAYLIST = "hrtv"
 ATTR_RE = re.compile(r'(catchup(?:-source|-days)?)="([^"]*)"')
 CHNO_RE = re.compile(r'tvg-chno="[^"]*"')
 STREAM_ID_RE = re.compile(r"/stream/([0-9a-f]{32})")
@@ -85,6 +89,7 @@ def load_channel_index(db_path, catchup_by_url, source_order=None):
         telecom = TELECOM_PLAYLIST in (ch.get("_file.m3u.name") or "") or TELECOM_HOST in url
         index[stream_id] = {
             "telecom": telecom,
+            "hrtv": (ch.get("_file.m3u.name") or "") == HRTV_PLAYLIST,
             "catchup": catchup_by_url.get(url),
             "rank": source_order.get(url) if source_order else None,
         }
@@ -170,7 +175,9 @@ def main():
         if e["info"] and e["info"]["telecom"]:
             rank = e["info"]["rank"]
             return (0, rank if rank is not None else old_chno(e["block"][0]), e["idx"])
-        return (1, old_chno(e["block"][0]), e["idx"])
+        if e["info"] and e["info"]["hrtv"]:
+            return (1, old_chno(e["block"][0]), e["idx"])
+        return (2, old_chno(e["block"][0]), e["idx"])
 
     entries.sort(key=sort_key)
 
@@ -211,6 +218,7 @@ def main():
             entries[pos] = e
 
     telecom_front = sum(1 for e in entries if e["info"] and e["info"]["telecom"])
+    hrtv_second = sum(1 for e in entries if e["info"] and e["info"]["hrtv"])
     for n, e in enumerate(entries, start=1):
         e["block"][0] = CHNO_RE.sub('tvg-chno="%d"' % n, e["block"][0], count=1)
 
@@ -232,8 +240,8 @@ def main():
     os.replace(tmp, target_path)
 
     print(
-        "entries=%d telecom_front=%d resolved=%d patched=%d already=%d unresolved=%d"
-        % (len(entries), telecom_front, resolved, patched, already, unresolved)
+        "entries=%d telecom_front=%d hrtv_second=%d resolved=%d patched=%d already=%d unresolved=%d"
+        % (len(entries), telecom_front, hrtv_second, resolved, patched, already, unresolved)
     )
     return 0
 

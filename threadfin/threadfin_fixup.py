@@ -53,7 +53,7 @@ import time
 
 # Playlist priority by substring of the playlist name (_file.m3u.name):
 # Liaoning Telecom first, then the combined source, then Hudie picks.
-PLAYLIST_PRIORITY = ["辽宁电信", "综合源", "蝴蝶精选"]
+PLAYLIST_PRIORITY = ["辽宁电信", "hrtv", "综合源", "蝴蝶精选"]
 KEEP_BACKUPS = 3
 
 # Extra providers to keep registered in settings.json (name, source URL).
@@ -61,7 +61,7 @@ KEEP_BACKUPS = 3
 # means a new source never needs the web UI or manual URL entry
 # (added 2026-11-26 for jackTV, whose server forces a file download
 # instead of giving a copyable subscription link).
-EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u")]
+EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u"), ("hrtv", "https://hrtv.118138.xyz/tv_proxy.m3u")]
 
 # Bracket pairs used as name decorations: () [] and the CJK variants
 # (written as escapes so this file stays pure ASCII outside the names above).
