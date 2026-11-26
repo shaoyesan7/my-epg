@@ -101,7 +101,7 @@ def fetch_epg_channel_ids(url):
 
 
 def fetch_playlist_tvgids(url):
-    """{stream_url: tvg-id} from one M3U playlist, or None on failure."""
+    """{stream_url: (tvg-id, tvg-logo)} from one M3U playlist, or None."""
     try:
         text = fetch_url_text(url)
     except Exception as e:
@@ -112,7 +112,9 @@ def fetch_playlist_tvgids(url):
     for line in text.splitlines():
         if line.startswith("#EXTINF"):
             m = re.search(r'tvg-id="([^"]*)"', line)
-            pending = m.group(1).strip() if m else ""
+            g = re.search(r'tvg-logo="([^"]*)"', line)
+            pending = (m.group(1).strip() if m else "",
+                       g.group(1).strip() if g else "")
         elif line and not line.startswith("#"):
             if pending is not None:
                 mapping[line.strip()] = pending
@@ -121,23 +123,30 @@ def fetch_playlist_tvgids(url):
 
 
 def sync_tvg_ids(channels, playlist_maps):
-    """Adopt the playlist tvg-id for DB channels renamed in the playlist.
-    Returns [(name, old, new), ...]."""
+    """Adopt the playlist tvg-id AND tvg-logo for DB channels. Threadfin
+    never refreshes either field for existing channels, so playlist-side
+    renames and logo additions never reach the DB on their own (the logo
+    half of this trap cost a separate fix round on 2026-11-26).
+    Returns ([(name, old, new) id syncs], [(name, logo) logo syncs])."""
     by_url = {}
     for pm in playlist_maps:
         if pm:
             by_url.update(pm)
-    synced = []
+    synced, logos = [], []
     for ch in channels:
         url = (ch.get("url") or "").strip()
         if not url or url not in by_url:
             continue
-        new = by_url[url]
+        new_id, new_logo = by_url[url]
         old = (ch.get("tvg-id") or "").strip()
-        if new and new != old:
-            ch["tvg-id"] = new
-            synced.append((display_name(ch), old, new))
-    return synced
+        if new_id and new_id != old:
+            ch["tvg-id"] = new_id
+            synced.append((display_name(ch), old, new_id))
+        old_logo = (ch.get("tvg-logo") or "").strip()
+        if new_logo and new_logo != old_logo:
+            ch["tvg-logo"] = new_logo
+            logos.append((display_name(ch), new_logo))
+    return synced, logos
 
 
 def repair_mappings(channels, epg_urls):
@@ -230,9 +239,11 @@ def main():
             playlist_maps.append(fetch_playlist_tvgids(u))
         else:
             epg_urls.append(u)
-    synced = sync_tvg_ids(channels, playlist_maps)
+    synced, logo_synced = sync_tvg_ids(channels, playlist_maps)
     for name, old, new in synced:
         print("tvg-id synced: %s %s -> %s" % (name, old, new))
+    for name, logo in logo_synced:
+        print("logo synced: %s" % name)
     repairs = repair_mappings(channels, epg_urls)
     for name, tvg, f in repairs:
         print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
@@ -272,8 +283,8 @@ def main():
     os.replace(tmp, path)
 
     print(
-        "total=%d newly_activated=%d tvgid_synced=%d mapping_repaired=%d deduped_off=%d active_final=%d"
-        % (total, newly_activated, len(synced), len(repairs), deduped_off, active_final)
+        "total=%d newly_activated=%d tvgid_synced=%d logo_synced=%d mapping_repaired=%d deduped_off=%d active_final=%d"
+        % (total, newly_activated, len(synced), len(logo_synced), len(repairs), deduped_off, active_final)
     )
     return 0
 
