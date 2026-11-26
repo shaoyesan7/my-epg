@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Threadfin xepg.json fixup v3.4.1 - run on the box while the threadfin container is STOPPED.
+Threadfin xepg.json fixup v3.4.2 - run on the box while the threadfin container is STOPPED.
 
 What it does, in order:
   0. Provider upkeep in settings.json: keep EXTRA_PROVIDERS registered;
@@ -49,6 +49,13 @@ What it does, in order:
      from the main lists' champion, so the three can stay active side by
      side instead of eating each other; only duplicates within the same
      category still collapse to one.
+     v3.4.2 (user rule, 2026-11-26): the telecom playlist is the MAIN
+     source and every other playlist only supplements it. If a name
+     group contains a telecom record, the best telecom record is the
+     group's ONLY survivor - every supplement copy of a telecom
+     channel is dropped, whatever its category, so a supplement can
+     never shadow the telecom original. The per-category champions
+     above only apply to groups with no telecom record.
 
 Safety:
   - A timestamped backup of the original file is written next to it first
@@ -471,6 +478,11 @@ def main():
     # copy of the same channel name no longer eat each other (or the
     # main lists' copy); duplicates WITHIN one category still collapse
     # to a single champion, chosen by the usual priority + tie-breaks.
+    # v3.4.2 (user rule, 2026-11-26): telecom supremacy - if a group
+    # contains a telecom record (rank 0), the best telecom record is
+    # the group's ONLY survivor and every supplement copy is dropped,
+    # whatever its category. The per-category split below only runs
+    # for groups with no telecom record.
     def dedupe_category(ch):
         pname = ch.get("_file.m3u.name") or ""
         if "jackTV" in pname:
@@ -497,6 +509,22 @@ def main():
                 playlist_rank(ch.get("_file.m3u.name")),
                 0 if ch.get("x-mapping") else 1,  # EPG-mapped copy wins ties
             )
+
+        # v3.4.2: telecom supremacy pre-check (see the step-3 comment).
+        telecom_members = [
+            ch for ch in members
+            if playlist_rank(ch.get("_file.m3u.name")) == 0
+        ]
+        if telecom_members:
+            telecom_members.sort(key=sort_key)
+            champion = telecom_members[0]
+            for loser in members:
+                if loser is champion:
+                    continue
+                if loser.get("x-active"):
+                    loser["x-active"] = False
+                    deduped_off += 1
+            continue
 
         by_category = {}
         for ch in members:
