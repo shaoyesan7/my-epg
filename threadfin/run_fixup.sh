@@ -13,7 +13,8 @@ docker stop threadfin >/dev/null 2>&1
 
 EPG1=https://raw.githubusercontent.com/shaoyesan7/my-epg/main/epg.xml.gz
 EPG2=https://epg.sxhz.de5.net/epg/index.php?type=gz
-if docker run --rm --entrypoint python3 -v "$CONF":/tf "$IMG" /tf/threadfin_fixup.py /tf/xepg.json "$EPG1" "$EPG2" >>"$LOG" 2>&1; then
+RAW=https://raw.githubusercontent.com/shaoyesan7/my-epg/main
+if docker run --rm --entrypoint python3 -v "$CONF":/tf "$IMG" /tf/threadfin_fixup.py /tf/xepg.json "$EPG1" "$EPG2" "$RAW/live-ln-telecom.m3u" "$RAW/live.m3u" "$RAW/live-hudie-picks.m3u" "$RAW/live-migu.m3u" >>"$LOG" 2>&1; then
     echo "$ts fixup OK" >>"$LOG"
 else
     echo "$ts fixup FAILED - restoring latest backup" >>"$LOG"

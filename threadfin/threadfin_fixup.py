@@ -7,7 +7,14 @@ What it does, in order:
   1. Activate every channel (x-active = true), except channels the user hid
      (x-hide-channel = true stays untouched). This undoes Threadfin's rule
      that new channels whose tvg-id matches no EPG stay inactive.
-  2. Repair EPG mappings: Threadfin's own auto-mapping only ever runs for
+  2. Sync channel identity from the playlists: Threadfin keys existing
+     channels by a name/URL hash and NEVER refreshes their tvg-id when a
+     playlist entry is renamed, so a corrected tvg-id in the playlist never
+     reaches the DB (proven 2026-11-26: the Shanghai Dongfang record still
+     carried tvg-id "上海东方卫视" a day after the playlist fix). For every
+     DB channel whose URL appears in a playlist with a different tvg-id,
+     adopt the playlist's tvg-id (internal keys are left untouched).
+  3. Repair EPG mappings: Threadfin's own auto-mapping only ever runs for
      INACTIVE channels with no XMLTV file assigned (see mapping() in its
      xepg.go), so an active channel whose tvg-id was fixed later keeps an
      empty mapping forever and shows no programme guide. For every active
@@ -16,7 +23,7 @@ What it does, in order:
      Evidence order: (a) mappings already used by healthy channels in this
      DB, (b) channel ids fetched from the EPG URLs passed on the command
      line (file rank = healthy-mapping count, descending).
-  3. Telecom-first dedupe: channels that share the same cleaned display name
+  4. Telecom-first dedupe: channels that share the same cleaned display name
      are grouped; the copy from the highest-priority playlist stays active,
      the rest are deactivated. Priority: LN-Telecom > Combined > Hudie > others.
      Within one playlist tier, a copy that carries an EPG mapping wins.
@@ -28,9 +35,11 @@ Safety:
   - Any error -> non-zero exit, original file left untouched (the wrapper
     restores the backup and restarts the container).
 
-Usage: python3 threadfin_fixup.py /path/to/xepg.json [epg-url ...]
-Prints one summary line: total=.. newly_activated=.. mapping_repaired=..
-deduped_off=.. active_final=.. plus one line per repaired mapping.
+Usage: python3 threadfin_fixup.py /path/to/xepg.json [url ...]
+Extra URLs are classified by content: XMLTV sources feed the mapping
+repair, M3U playlists feed the identity sync.
+Prints one summary line: total=.. newly_activated=.. tvgid_synced=..
+mapping_repaired=.. deduped_off=.. active_final=.. plus detail lines.
 """
 
 import gzip
@@ -71,20 +80,64 @@ def display_name(ch):
     return ch.get("x-name") or ch.get("name") or ""
 
 
+def fetch_url_text(url):
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        raw = r.read()
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    return raw.decode("utf-8", errors="replace")
+
+
 def fetch_epg_channel_ids(url):
     """Channel ids of one XMLTV source (gzip or plain), or None on failure."""
     try:
-        import urllib.request
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            raw = r.read()
-        if raw[:2] == b"\x1f\x8b":
-            raw = gzip.decompress(raw)
-        text = raw.decode("utf-8", errors="replace")
+        text = fetch_url_text(url)
         return set(re.findall(r'<channel id="([^"]+)"', text))
     except Exception as e:
         print("epg fetch failed (%s): %s" % (url, e))
         return None
+
+
+def fetch_playlist_tvgids(url):
+    """{stream_url: tvg-id} from one M3U playlist, or None on failure."""
+    try:
+        text = fetch_url_text(url)
+    except Exception as e:
+        print("playlist fetch failed (%s): %s" % (url, e))
+        return None
+    mapping = {}
+    pending = None
+    for line in text.splitlines():
+        if line.startswith("#EXTINF"):
+            m = re.search(r'tvg-id="([^"]*)"', line)
+            pending = m.group(1).strip() if m else ""
+        elif line and not line.startswith("#"):
+            if pending is not None:
+                mapping[line.strip()] = pending
+            pending = None
+    return mapping
+
+
+def sync_tvg_ids(channels, playlist_maps):
+    """Adopt the playlist tvg-id for DB channels renamed in the playlist.
+    Returns [(name, old, new), ...]."""
+    by_url = {}
+    for pm in playlist_maps:
+        if pm:
+            by_url.update(pm)
+    synced = []
+    for ch in channels:
+        url = (ch.get("url") or "").strip()
+        if not url or url not in by_url:
+            continue
+        new = by_url[url]
+        old = (ch.get("tvg-id") or "").strip()
+        if new and new != old:
+            ch["tvg-id"] = new
+            synced.append((display_name(ch), old, new))
+    return synced
 
 
 def repair_mappings(channels, epg_urls):
@@ -137,7 +190,7 @@ def main():
         print("usage: threadfin_fixup.py <xepg.json> [epg-url ...]", file=sys.stderr)
         return 2
     path = sys.argv[1]
-    epg_urls = sys.argv[2:]
+    extra_urls = sys.argv[2:]
 
     with open(path, "r", encoding="utf-8") as f:
         db = json.load(f)
@@ -170,7 +223,16 @@ def main():
             ch["x-active"] = True
             newly_activated += 1
 
-    # --- step 2: repair EPG mappings Threadfin will never fix itself ---
+    # --- step 2: sync tvg-ids from the playlists, then repair mappings ---
+    epg_urls, playlist_maps = [], []
+    for u in extra_urls:
+        if u.endswith(".m3u"):
+            playlist_maps.append(fetch_playlist_tvgids(u))
+        else:
+            epg_urls.append(u)
+    synced = sync_tvg_ids(channels, playlist_maps)
+    for name, old, new in synced:
+        print("tvg-id synced: %s %s -> %s" % (name, old, new))
     repairs = repair_mappings(channels, epg_urls)
     for name, tvg, f in repairs:
         print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
@@ -210,8 +272,8 @@ def main():
     os.replace(tmp, path)
 
     print(
-        "total=%d newly_activated=%d mapping_repaired=%d deduped_off=%d active_final=%d"
-        % (total, newly_activated, len(repairs), deduped_off, active_final)
+        "total=%d newly_activated=%d tvgid_synced=%d mapping_repaired=%d deduped_off=%d active_final=%d"
+        % (total, newly_activated, len(synced), len(repairs), deduped_off, active_final)
     )
     return 0
 
