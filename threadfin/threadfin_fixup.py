@@ -61,7 +61,7 @@ KEEP_BACKUPS = 3
 # means a new source never needs the web UI or manual URL entry
 # (added 2026-11-26 for jackTV, whose server forces a file download
 # instead of giving a copyable subscription link).
-EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u"), ("wuye", "https://raw.githubusercontent.com/shaoyesan7/my-epg/main/live-wuye.m3u")]
+EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u")]
 
 # Bracket pairs used as name decorations: () [] and the CJK variants
 # (written as escapes so this file stays pure ASCII outside the names above).
