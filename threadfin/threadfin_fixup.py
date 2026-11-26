@@ -43,6 +43,7 @@ mapping_repaired=.. deduped_off=.. active_final=.. plus detail lines.
 """
 
 import gzip
+import hashlib
 import json
 import os
 import re
@@ -54,6 +55,13 @@ import time
 # Liaoning Telecom first, then the combined source, then Hudie picks.
 PLAYLIST_PRIORITY = ["辽宁电信", "综合源", "蝴蝶精选"]
 KEEP_BACKUPS = 3
+
+# Extra providers to keep registered in settings.json (name, source URL).
+# Threadfin downloads them like any UI-added playlist; registering here
+# means a new source never needs the web UI or manual URL entry
+# (added 2026-11-26 for jackTV, whose server forces a file download
+# instead of giving a copyable subscription link).
+EXTRA_PROVIDERS = [("jackTV", "https://php.946985.filegear-sg.me/jackTV.m3u")]
 
 # Bracket pairs used as name decorations: () [] and the CJK variants
 # (written as escapes so this file stays pure ASCII outside the names above).
@@ -194,6 +202,70 @@ def repair_mappings(channels, epg_urls):
     return repairs
 
 
+def register_providers(xepg_path):
+    """Ensure EXTRA_PROVIDERS exist in settings.json (same folder as
+    xepg.json), mimicking a UI-added playlist: clone the most complete
+    existing m3u entry so every Threadfin-specific key matches this
+    install, then retarget name / source / local file / provider id.
+    Idempotent. Prints one provider_registered=<name> line per new
+    provider so the wrapper can run a second pass after Threadfin has
+    imported it. Never raises: any problem just skips registration."""
+    settings_path = os.path.join(os.path.dirname(xepg_path) or ".", "settings.json")
+    try:
+        with open(settings_path, "r", encoding="utf-8") as f:
+            settings = json.load(f)
+        m3u_files = settings["files"]["m3u"]
+        if not isinstance(m3u_files, dict) or not m3u_files:
+            print("provider register skipped: no existing m3u providers")
+            return []
+    except Exception as e:
+        print("provider register skipped: %s" % e)
+        return []
+
+    registered = []
+    for name, url in EXTRA_PROVIDERS:
+        if any((e or {}).get("file.source") == url for e in m3u_files.values()):
+            continue
+        donor = max(m3u_files.values(), key=lambda e: len(e or {}))
+        entry = json.loads(json.dumps(donor))
+        new_id = name.upper() + hashlib.md5(url.encode("utf-8")).hexdigest()[:8].upper()
+        entry["id.provider"] = new_id
+        entry["name"] = name
+        entry["file.source"] = url
+        for key in list(entry.keys()):
+            if key.startswith("file.") and key != "file.source":
+                entry[key] = new_id + ".m3u"
+        for key in ("counter.error", "counter.download"):
+            if key in entry:
+                entry[key] = 0
+        if "provider.availability" in entry:
+            entry["provider.availability"] = 100
+        if "last.update" in entry:
+            entry["last.update"] = ""
+        entry.pop("new", None)
+        m3u_files[new_id] = entry
+        registered.append(name)
+
+    if not registered:
+        return []
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    shutil.copy2(settings_path, "%s.bak-%s" % (settings_path, stamp))
+    folder = os.path.dirname(settings_path) or "."
+    siblings = sorted(p for p in os.listdir(folder) if p.startswith("settings.json.bak-"))
+    for old in siblings[:-KEEP_BACKUPS]:
+        try:
+            os.remove(os.path.join(folder, old))
+        except OSError:
+            pass
+    tmp = settings_path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(settings, f, ensure_ascii=False)
+    os.replace(tmp, settings_path)
+    for name in registered:
+        print("provider_registered=%s" % name)
+    return registered
+
+
 def main():
     if len(sys.argv) < 2:
         print("usage: threadfin_fixup.py <xepg.json> [epg-url ...]", file=sys.stderr)
@@ -219,6 +291,9 @@ def main():
             os.remove(os.path.join(folder, old))
         except OSError:
             pass
+
+    # --- step 0: keep extra providers (jackTV) registered in settings ---
+    register_providers(path)
 
     channels = list(db.values())
     total = len(channels)
