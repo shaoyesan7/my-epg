@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v5.5). Three jobs, in order:
+Patch Threadfin's exported M3U (v5.6). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
      keeping their relative order; the hrtv playlist (a Hong Kong /
@@ -22,7 +22,10 @@ Patch Threadfin's exported M3U (v5.5). Three jobs, in order:
      M3U, matched per channel. v5.5: the playseek placeholders are
      rewritten to the ${(b)...} / ${(e)...} dialect - Ku9 only
      substitutes that form, while FongMi-family apps accept both
-     (user-verified in both apps 2026-11-27).
+     (user-verified in both apps 2026-11-27). v5.6: entries that already
+     carry catchup attributes are no longer skipped blindly - if the
+     stored attributes differ from the wanted ones (e.g. the old
+     placeholder dialect), they are stripped and rewritten.
   3. Idempotent: a second run changes nothing. Files are replaced
      atomically; Threadfin serves them from disk per request, so NO
      container restart is needed.
@@ -49,6 +52,7 @@ TELECOM_HOST = "10.255.128.136"
 TELECOM_PLAYLIST = "辽宁电信"
 HRTV_PLAYLIST = "hrtv"
 ATTR_RE = re.compile(r'(catchup(?:-source|-days)?)="([^"]*)"')
+ATTR_STRIP_RE = re.compile(r'\s*catchup(?:-source|-days)?="[^"]*"')
 CHNO_RE = re.compile(r'tvg-chno="[^"]*"')
 STREAM_ID_RE = re.compile(r"/stream/([0-9a-f]{32})")
 
@@ -235,10 +239,12 @@ def main():
     for e in entries:
         if not e["info"] or not e["info"]["catchup"]:
             continue
-        if "catchup" in e["block"][0]:
+        want = e["info"]["catchup"]
+        if want in e["block"][0]:
             already += 1
             continue
-        e["block"][0] = insert_attrs(e["block"][0], e["info"]["catchup"])
+        line = ATTR_STRIP_RE.sub("", e["block"][0])
+        e["block"][0] = insert_attrs(line, want)
         patched += 1
 
     out = header + [line for e in entries for line in e["block"]] + footer
