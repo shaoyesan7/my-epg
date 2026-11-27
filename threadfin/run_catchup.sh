@@ -18,7 +18,7 @@ PC_URL=https://raw.githubusercontent.com/shaoyesan7/my-epg/main/threadfin/patch_
 # fails or does not carry the v5.3 marker, keep the local copy).
 if curl -sL --max-time 30 -o "$CONF/patch_catchup.py.new" "$PC_URL" \
    && [ -s "$CONF/patch_catchup.py.new" ] \
-   && grep -q "swap_epg_export" "$CONF/patch_catchup.py.new"; then
+   && grep -q "sys.exit(main())" "$CONF/patch_catchup.py.new"; then
   mv "$CONF/patch_catchup.py.new" "$CONF/patch_catchup.py"
   chmod +x "$CONF/patch_catchup.py"
 else

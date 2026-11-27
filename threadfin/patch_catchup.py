@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v5.3). Four jobs, in order:
+Patch Threadfin's exported M3U (v5.4). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
      keeping their relative order; the hrtv playlist (a Hong Kong /
@@ -20,18 +20,7 @@ Patch Threadfin's exported M3U (v5.3). Four jobs, in order:
      the telecom list when it regenerates the M3U, which kills the replay
      feature in TV apps. They are copied back from the original telecom
      M3U, matched per channel.
-  3. EPG SWAP (v5.3): Threadfin's native XMLTV export merges both EPG
-     sources into a ~39 MB file that the user's TV apps fail to refresh
-     or parse reliably (stale guides, placeholder blocks). The export
-     (threadfin.xml / threadfin.xml.gz in the data dir) is therefore
-     replaced with the user's own EPG file - the very copy Threadfin
-     itself downloaded into the data dir - which those apps already
-     digest fine via his other subscriptions. The channel side of
-     Threadfin (merge / dedupe / order / catchup / 302 playback) is
-     untouched; only the guide payload changes. Trade-off: channels
-     whose guide came only from the second EPG source (sxhz) lose it.
-     Fail-open: any problem leaves the native export alone.
-  4. Idempotent: a second run changes nothing. Files are replaced
+  3. Idempotent: a second run changes nothing. Files are replaced
      atomically; Threadfin serves them from disk per request, so NO
      container restart is needed.
 
@@ -44,10 +33,9 @@ createStreamingURL in Threadfin's src/system.go. The channel DB
 entry can be recomputed and resolved back to its channel.
 
 Usage: python3 patch_catchup.py <threadfin.m3u> <xepg.json> <telecom-source.m3u>
-Prints: entries=.. telecom_front=.. resolved=.. patched=.. already=.. unresolved=.. epg=..
+Prints: entries=.. telecom_front=.. resolved=.. patched=.. already=.. unresolved=..
 """
 
-import gzip
 import hashlib
 import json
 import os
@@ -57,7 +45,6 @@ import sys
 TELECOM_HOST = "10.255.128.136"
 TELECOM_PLAYLIST = "辽宁电信"
 HRTV_PLAYLIST = "hrtv"
-OWN_EPG_NAME = "XPVX2OXDG2MBI75NNRBD.xml"
 ATTR_RE = re.compile(r'(catchup(?:-source|-days)?)="([^"]*)"')
 CHNO_RE = re.compile(r'tvg-chno="[^"]*"')
 STREAM_ID_RE = re.compile(r"/stream/([0-9a-f]{32})")
@@ -123,55 +110,6 @@ def insert_attrs(extinf_line, attrs):
 def old_chno(extinf_line):
     m = re.search(r'tvg-chno="(\d+)"', extinf_line)
     return int(m.group(1)) if m else 1 << 30
-
-
-def swap_epg_export(data_dir):
-    """Job 3: replace Threadfin's XMLTV export with the user's own EPG.
-
-    The source is the copy of the user's EPG that Threadfin itself
-    downloaded into the data dir (OWN_EPG_NAME); fallback is the largest
-    non-export .xml there over 10 MB. Returns a short status string and
-    never raises: on any problem the native export is left untouched.
-    """
-    try:
-        src = os.path.join(data_dir, OWN_EPG_NAME)
-        if not os.path.exists(src) or os.path.getsize(src) < 10000000:
-            cands = []
-            for fn in os.listdir(data_dir):
-                if fn.endswith(".xml") and fn != "threadfin.xml":
-                    p = os.path.join(data_dir, fn)
-                    try:
-                        cands.append((os.path.getsize(p), p))
-                    except OSError:
-                        pass
-            cands.sort(reverse=True)
-            if not cands or cands[0][0] < 10000000:
-                return "skipped:no-source"
-            src = cands[0][1]
-        with open(src, "rb") as f:
-            data = f.read()
-        if b"<tv" not in data or b"<programme" not in data:
-            return "skipped:bad-source"
-        dst = os.path.join(data_dir, "threadfin.xml")
-        cur = None
-        if os.path.exists(dst):
-            with open(dst, "rb") as f:
-                cur = f.read()
-        if cur == data:
-            result = "already"
-        else:
-            tmp = dst + ".tmp"
-            with open(tmp, "wb") as f:
-                f.write(data)
-            os.replace(tmp, dst)
-            result = "swapped:%d" % len(data)
-        gz_tmp = dst + ".gz.tmp"
-        with open(gz_tmp, "wb") as f:
-            f.write(gzip.compress(data, compresslevel=6))
-        os.replace(gz_tmp, dst + ".gz")
-        return result
-    except Exception as e:
-        return "skipped:%s" % type(e).__name__
 
 
 def main():
@@ -301,12 +239,9 @@ def main():
         f.write("\n".join(out))
     os.replace(tmp, target_path)
 
-    # --- job 3: swap the XMLTV export for the user's own EPG (fail-open) ---
-    epg_result = swap_epg_export(os.path.dirname(os.path.abspath(target_path)))
-
     print(
-        "entries=%d telecom_front=%d hrtv_second=%d resolved=%d patched=%d already=%d unresolved=%d epg=%s"
-        % (len(entries), telecom_front, hrtv_second, resolved, patched, already, unresolved, epg_result)
+        "entries=%d telecom_front=%d hrtv_second=%d resolved=%d patched=%d already=%d unresolved=%d"
+        % (len(entries), telecom_front, hrtv_second, resolved, patched, already, unresolved)
     )
     return 0
 
