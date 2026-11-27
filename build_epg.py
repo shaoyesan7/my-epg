@@ -45,6 +45,8 @@ SOURCES = [
 
 PW_URL = "https://epg.pw/xmltv/epg_CN.xml"
 
+SXHZ_URL = "https://epg.sxhz.de5.net/epg/index.php?type=gz"
+
 UA = {"User-Agent": "Mozilla/5.0 (epg-merge for personal use)"}
 
 
@@ -127,6 +129,70 @@ def append_pw(merged, chan_display, today):
     return added
 
 
+def append_sxhz(merged, chan_display, today, win_start):
+    """sxhz 并入（用户思路, 2026-11-27）：sxhz 原来整份登记在 Threadfin 里,
+    与主单同名的频道会被 Threadfin 随机挂到较短的那份上（CCTV-1 只到当天）。
+    改为像 epgpw 一样并进本流水线当原料, Threadfin 只用主单一份：
+      - 已有频道（按规范名对齐, 或 sxhz 的原始 id 恰好就是主单频道 id）：
+        只做尾部补齐, 规则同 epgpw（晚于现有最晚节目才接, 去重, 上限+6天）；
+      - 全新频道（sxhz 独有）：整台并入, 频道 id 沿用 sxhz 的 id（Threadfin
+        里已有频道正是按这个 id 挂 sxhz 的, 并入后可原样改挂主单）, 节目裁到
+        [今天-6天, 今天+6天] 窗口, 自带去重；没有任何在窗口内节目的不建台。
+    返回 (尾部补齐条数, 新增频道数)。抓取/解析失败抛异常, 调用方跳过。"""
+    raw = fetch(SXHZ_URL)
+    channels, programmes = parse_xmltv(raw)
+    out_keys = set(chan_display)
+    id2key = {}
+    new_ids = {}
+    for cid, dn in channels.items():
+        c = canon(dn)
+        if c in out_keys:
+            id2key[cid] = c
+        elif cid in out_keys:
+            id2key[cid] = cid
+        else:
+            id2key[cid] = cid
+            new_ids[cid] = dn
+    last_start = {}
+    for c, start, stop, title, desc in merged:
+        if start > last_start.get(c, ""):
+            last_start[c] = start
+    cap = (today + timedelta(days=6)).strftime("%Y%m%d")
+    win_lo = win_start.strftime("%Y%m%d")
+    seen = {(c, s) for c, s, *_ in merged}
+    added_tail = 0
+    new_prog = {}
+    for cid, start, stop, title, desc in programmes:
+        key = id2key.get(cid)
+        if key is None:
+            continue
+        if start[:8] > cap:
+            continue
+        k = (key, start)
+        if key in new_ids:
+            if start[:8] < win_lo:
+                continue
+            if k in seen:
+                continue
+            seen.add(k)
+            merged.append((key, start, stop, title, desc))
+            new_prog[key] = new_prog.get(key, 0) + 1
+        else:
+            if start <= last_start.get(key, ""):
+                continue
+            if k in seen:
+                continue
+            seen.add(k)
+            merged.append((key, start, stop, title, desc))
+            added_tail += 1
+    added_ch = 0
+    for cid, dn in new_ids.items():
+        if new_prog.get(cid):
+            chan_display[cid] = dn
+            added_ch += 1
+    return added_tail, added_ch
+
+
 def main(out_xml="epg.xml"):
     today = datetime.now(CN_TZ).date()
     win_start = today - timedelta(days=6)   # 过去7天含当天
@@ -172,11 +238,17 @@ def main(out_xml="epg.xml"):
     except Exception as e:
         per_source["epgpw"] = f"FAILED: {e}"
 
+    try:
+        sx_tail, sx_new = append_sxhz(merged, chan_display, today, win_start)
+        per_source["sxhz"] = f"appended_programmes={sx_tail} new_channels={sx_new}"
+    except Exception as e:
+        per_source["sxhz"] = f"FAILED: {e}"
+
     merged.sort(key=lambda x: (x[0], x[1]))
 
     tv = ET.Element("tv", {
         "generator-info-name": "epg-merge (personal)",
-        "source-info-name": "zsdc + kuke31 + plsy1 + 112114 + epgpw(tail)",
+        "source-info-name": "zsdc + kuke31 + plsy1 + 112114 + epgpw(tail) + sxhz(tail+new)",
     })
     used = sorted({m[0] for m in merged})
     for c in used:
