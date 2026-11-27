@@ -12,10 +12,17 @@ EPG 合成器（给峰少自用）
                                                         过去7天+次日, 运营商数据
   4. 112114 https://epg.112114.xyz/pp.xml.gz            当天, 频道多(500+)
 
+外加一道「补预告」工序（不是第五个平级源）：
+  epgpw https://epg.pw/xmltv/epg_CN.xml  无回放, 预告最长(约6天)。它的节目时间轴与上面
+  四源对不齐（同一节目开始时间常差几分钟），若当平级源按时段去重, 会把今天/明天的
+  节目单叠出双份。所以只做尾部补齐：四源合并完之后, 对每个频道, 只把 epgpw 里
+  开始时间晚于该频道现有最晚节目的条目接在后面（自带去重, 上限今天+6天）。
+  已有日期范围一条不动；epgpw 抓取失败时整道工序跳过, 不影响主单发布。
+
 合并规则：
   - 频道按「规范名」对齐（CCTV-1 / CCTV1 / CCTV1综合 视为同一频道）
   - 同一频道同一开始时间的节目，按源优先级取先出现的一条（去重）
-  - 只保留 [今天-6天, 今天+3天] 窗口内的节目
+  - 四源只保留 [今天-6天, 今天+3天] 窗口内的节目；epgpw 补齐部分单独放宽到今天+6天
 输出：epg.xml / epg.xml.gz + stats.json（频道数、节目数、实际日期范围）
 """
 import gzip
@@ -35,6 +42,8 @@ SOURCES = [
     ("plsy1",  "https://raw.githubusercontent.com/plsy1/epg/main/e/seven-days.xml.gz"),
     ("112114", "https://epg.112114.xyz/pp.xml.gz"),
 ]
+
+PW_URL = "https://epg.pw/xmltv/epg_CN.xml"
 
 UA = {"User-Agent": "Mozilla/5.0 (epg-merge for personal use)"}
 
@@ -84,6 +93,40 @@ def parse_xmltv(raw: bytes):
     return channels, programmes
 
 
+def append_pw(merged, chan_display, today):
+    """尾部补齐：把 epgpw 的节目按规范名对齐, 只接在每个频道现有覆盖的末尾之后。
+    返回实际补进的条数。抓取/解析失败会抛异常, 由调用方兜底跳过。"""
+    raw = fetch(PW_URL)
+    channels, programmes = parse_xmltv(raw)
+    id2canon = {}
+    for cid, dn in channels.items():
+        c = canon(dn)
+        if c in chan_display:           # 只补已有频道, 不新建频道
+            id2canon[cid] = c
+    last_start = {}
+    for c, start, stop, title, desc in merged:
+        if start > last_start.get(c, ""):
+            last_start[c] = start
+    cap = (today + timedelta(days=6)).strftime("%Y%m%d")
+    seen = {(c, s) for c, s, *_ in merged}
+    added = 0
+    for cid, start, stop, title, desc in programmes:
+        c = id2canon.get(cid)
+        if not c:
+            continue
+        if start[:8] > cap:
+            continue
+        if start <= last_start.get(c, ""):
+            continue                    # 已有覆盖范围之内, 一条不碰
+        key = (c, start)
+        if key in seen:
+            continue                    # epgpw 内部同台多份, 去重
+        seen.add(key)
+        merged.append((c, start, stop, title, desc))
+        added += 1
+    return added
+
+
 def main(out_xml="epg.xml"):
     today = datetime.now(CN_TZ).date()
     win_start = today - timedelta(days=6)   # 过去7天含当天
@@ -123,11 +166,17 @@ def main(out_xml="epg.xml"):
             added += 1
         per_source[sname] = f"channels={len(channels)} added_programmes={added}"
 
+    try:
+        pw_added = append_pw(merged, chan_display, today)
+        per_source["epgpw"] = f"appended_programmes={pw_added}"
+    except Exception as e:
+        per_source["epgpw"] = f"FAILED: {e}"
+
     merged.sort(key=lambda x: (x[0], x[1]))
 
     tv = ET.Element("tv", {
         "generator-info-name": "epg-merge (personal)",
-        "source-info-name": "zsdc + kuke31 + plsy1 + 112114",
+        "source-info-name": "zsdc + kuke31 + plsy1 + 112114 + epgpw(tail)",
     })
     used = sorted({m[0] for m in merged})
     for c in used:
