@@ -4,23 +4,29 @@
 # catchup attributes. If fewer than 100 channels carry catchup-source
 # AND the rebuild is finished (file untouched for 3+ minutes),
 # re-apply the patch automatically.
-# v3 adds a morning EPG refresh: the user's EPG is rebuilt upstream at
-# 06:30/18:30 Beijing, but Threadfin only pulls it at 00:00 and most
-# channels' listings end at midnight, so the guide runs dry every early
-# morning. Once a day in the 07:00 hour (after the 06:30 build), restart
-# Threadfin - it re-imports the EPG on startup. Stamp-guarded: once only.
+# Scheduled EPG refresh: the user's EPG is rebuilt upstream at 06:30 and
+# 18:30 Beijing, but Threadfin's own update runs at 00:00, so fresh builds
+# sit unpulled for hours (the guide ran dry every early morning before
+# the 07:00 leg existed). v4 restarts Threadfin once in the 07:00 hour
+# and once in the 19:00 hour - about 30 min after each upstream build -
+# so it re-imports the fresh EPG. Stamp-guarded per slot: once only.
+# A restart never cuts a channel that is already playing (Threadfin
+# answers with a 302 redirect; traffic does not transit the box).
 CONF=/opt/docker/threadfin/conf
 M3U=$CONF/data/threadfin.m3u
 LOCK=$CONF/.guard_catchup.lock
 LOG=$CONF/fixup.log
-STAMP=$CONF/.morning_refresh.stamp
 
 [ -f "$M3U" ] || exit 0
-# --- morning EPG refresh (v3): once a day, in the 07:00 hour ---
+# --- scheduled EPG refresh (v4): 07:00 and 19:00 slots ---
 today=$(date +%Y%m%d)
-if [ "$(date +%H)" = "07" ] && [ "$(cat "$STAMP" 2>/dev/null)" != "$today" ]; then
+H=$(date +%H)
+STAMP=""
+[ "$H" = "07" ] && STAMP=$CONF/.morning_refresh.stamp
+[ "$H" = "19" ] && STAMP=$CONF/.evening_refresh.stamp
+if [ -n "$STAMP" ] && [ "$(cat "$STAMP" 2>/dev/null)" != "$today" ]; then
     echo "$today" > "$STAMP"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') guard: morning EPG refresh - restarting threadfin" >> "$LOG"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') guard: scheduled EPG refresh (${H}:00 slot) - restarting threadfin" >> "$LOG"
     docker restart threadfin >/dev/null 2>&1
     exit 0
 fi
