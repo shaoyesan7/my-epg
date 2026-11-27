@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Threadfin xepg.json fixup v3.4.2 - run on the box while the threadfin container is STOPPED.
+Threadfin xepg.json fixup v3.5 - run on the box while the threadfin container is STOPPED.
 
 What it does, in order:
   0. Provider upkeep in settings.json: keep EXTRA_PROVIDERS registered;
@@ -39,6 +39,18 @@ What it does, in order:
      Evidence order: (a) mappings already used by healthy channels in this
      DB, (b) channel ids fetched from the EPG URLs passed on the command
      line (file rank = healthy-mapping count, descending).
+  3b. Prefer the longer guide (v3.5): Threadfin's auto-mapping assigns
+     each channel to ONE XMLTV file, and its choice is arbitrary when
+     several files carry the same channel id - on 2026-11-27 CCTV-1,
+     CCTV-10 and CCTV-15 sat on the sxhz file, whose coverage for them
+     ends days earlier than the user's own EPG, so the apps showed no
+     forecast for them while channels mapped to the own file showed
+     several days. For every active channel, compare the last programme
+     date of its mapping id in each downloaded XMLTV file under data/
+     and move x-xmltv-file to the file that reaches furthest.
+     Strictly-later only: ties and unreadable files change nothing, and
+     no file is ever dropped - a channel whose id exists only in the
+     shorter file keeps it.
   4. Telecom-first dedupe: channels that share the same cleaned display name
      are grouped; the copy from the highest-priority playlist stays active,
      the rest are deactivated. Priority: LN-Telecom > hrtv > Combined >
@@ -245,6 +257,69 @@ def repair_mappings(channels, epg_urls):
             ch["x-mapping"] = tvg
             repairs.append((display_name(ch), tvg, target))
     return repairs
+
+
+def fetch_file_coverage(path):
+    """{channel_id: last programme date YYYYMMDD} from one downloaded
+    XMLTV file on disk (plain or gzip), or None on failure."""
+    try:
+        with open(path, "rb") as f:
+            raw = f.read()
+        if raw[:2] == b"\x1f\x8b":
+            raw = gzip.decompress(raw)
+        text = raw.decode("utf-8", errors="replace")
+    except Exception as e:
+        print("epg file read failed (%s): %s" % (path, e))
+        return None
+    cov = {}
+    for tag in re.findall(r"<programme[^>]*>", text):
+        cm = re.search(r'channel="([^"]+)"', tag)
+        sm = re.search(r'start="(\d{8})', tag)
+        if cm and sm:
+            cid, d = cm.group(1), sm.group(1)
+            if d > cov.get(cid, ""):
+                cov[cid] = d
+    return cov
+
+
+def prefer_longer_coverage(channels, xepg_path):
+    """Step 3b (v3.5): move each active channel's x-xmltv-file to the
+    downloaded XMLTV file whose coverage for its mapping id reaches
+    furthest (strictly later last programme date wins). The downloaded
+    files live in data/ next to xepg.json under their internal names,
+    so no URL-to-file matching is needed. Fail-open: a file that cannot
+    be read takes no part, and a channel is never moved away from a
+    file whose coverage is unknown. Returns [(name, id, old, new)]."""
+    data_dir = os.path.join(os.path.dirname(xepg_path) or ".", "data")
+    files = set()
+    for ch in channels:
+        f = (ch.get("x-xmltv-file") or "").strip()
+        if f and f != "-":
+            files.add(f)
+    cov = {}
+    for f in files:
+        c = fetch_file_coverage(os.path.join(data_dir, f))
+        if c is not None:
+            cov[f] = c
+    moves = []
+    for ch in channels:
+        if ch.get("x-hide-channel") or not ch.get("x-active"):
+            continue
+        m = (ch.get("x-mapping") or "").strip()
+        cur = (ch.get("x-xmltv-file") or "").strip()
+        if not m or m == "-" or cur not in cov:
+            continue
+        best_f, best_d = cur, cov[cur].get(m, "")
+        for f, c in cov.items():
+            if f == cur:
+                continue
+            d = c.get(m)
+            if d and d > best_d:
+                best_f, best_d = f, d
+        if best_f != cur:
+            ch["x-xmltv-file"] = best_f
+            moves.append((display_name(ch), m, cur, best_f))
+    return moves
 
 
 def _save_settings(settings_path, settings):
@@ -468,6 +543,9 @@ def main():
     repairs = repair_mappings(channels, epg_urls)
     for name, tvg, f in repairs:
         print("mapping repaired: %s -> %s (%s)" % (name, tvg, f))
+    moves = prefer_longer_coverage(channels, path)
+    for name, mid, old, new in moves:
+        print("mapping moved: %s %s %s -> %s" % (name, mid, old, new))
 
     # --- step 3: telecom-first dedupe by cleaned display name ---
     # v3.4.1: champions are picked PER CATEGORY, not per name group.
@@ -547,8 +625,8 @@ def main():
     os.replace(tmp, path)
 
     print(
-        "total=%d newly_activated=%d tvgid_synced=%d logo_synced=%d mapping_repaired=%d deduped_off=%d active_final=%d"
-        % (total, newly_activated, len(synced), len(logo_synced), len(repairs), deduped_off, active_final)
+        "total=%d newly_activated=%d tvgid_synced=%d logo_synced=%d mapping_repaired=%d mapping_moved=%d deduped_off=%d active_final=%d"
+        % (total, newly_activated, len(synced), len(logo_synced), len(repairs), len(moves), deduped_off, active_final)
     )
     return 0
 
