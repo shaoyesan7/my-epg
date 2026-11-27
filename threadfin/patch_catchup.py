@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Patch Threadfin's exported M3U (v5.4). Three jobs, in order:
+Patch Threadfin's exported M3U (v5.5). Three jobs, in order:
 
   1. ORDER: Liaoning Telecom channels move to the front of the file,
      keeping their relative order; the hrtv playlist (a Hong Kong /
@@ -19,7 +19,10 @@ Patch Threadfin's exported M3U (v5.4). Three jobs, in order:
   2. CATCHUP: Threadfin drops the catchup / catchup-source attributes of
      the telecom list when it regenerates the M3U, which kills the replay
      feature in TV apps. They are copied back from the original telecom
-     M3U, matched per channel.
+     M3U, matched per channel. v5.5: the playseek placeholders are
+     rewritten to the ${(b)...} / ${(e)...} dialect - Ku9 only
+     substitutes that form, while FongMi-family apps accept both
+     (user-verified in both apps 2026-11-27).
   3. Idempotent: a second run changes nothing. Files are replaced
      atomically; Threadfin serves them from disk per request, so NO
      container restart is needed.
@@ -62,7 +65,12 @@ def parse_source(path):
                 found = ATTR_RE.findall(line)
                 pending_attrs = None
                 if found:
-                    pending_attrs = " ".join('%s="%s"' % kv for kv in found)
+                    fixed = []
+                    for k, v in found:
+                        if k == "catchup-source":
+                            v = v.replace("{(b)", "${(b)").replace("{(e)", "${(e)")
+                        fixed.append((k, v))
+                    pending_attrs = " ".join('%s="%s"' % kv for kv in fixed)
             elif line and not line.startswith("#"):
                 url = line.strip()
                 if url not in order:
